@@ -1,0 +1,112 @@
+<div class="header-bar">
+  <div class="header-left">
+    <input
+      class="symbol-input"
+      [(ngModel)]="symbol"
+      placeholder="Stock Symbol"
+      style="width: 100px; margin-right: 8px"
+      (keyup.enter)="loadSymbol()"
+    />
+
+    <select
+      [(ngModel)]="range"
+      style="margin-right: 8px"
+      (change)="onRangeChange()"
+    >
+      <option value="1y">1 Year</option>
+      <option value="2y">2 Years</option>
+      <option value="5y">5 Years</option>
+      <option value="10y">10 Years</option>
+      <option value="max">Max</option>
+      <option value="ytd">Year to Date</option>
+    </select>
+
+    <select [(ngModel)]="timeframe" style="margin-right: 8px">
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+    <span class="price-info"> {{ fullName }}</span>
+  </div>
+  <span class="price-info" *ngIf="!isLoadingName">
+    <span
+      *ngIf="latestHigh && latestLow && latestOpen && latestClose"
+      [style.color]="latestBarColor"
+    >
+      H=${{ latestHigh | number : "1.2-2" }} L=${{
+        latestLow | number : "1.2-2"
+      }}
+      O=${{ latestOpen | number : "1.2-2" }} C=${{
+        latestClose | number : "1.2-2"
+      }}
+      ({{ latestChangePct | number : "1.2-2" }}%)
+    </span>
+  </span>
+  <div class="header-right">
+    <button (click)="showPanel = !showPanel">⚙️ Settings</button>
+    <button (click)="showWatchlist = !showWatchlist">📋 Watchlist</button>
+  </div>
+</div>
+
+<app-settings-panel
+  *ngIf="showPanel"
+  [showDMark]="showDMark"
+  (showDMarkChange)="showDMark = $event"
+  [showSma1]="showSma1"
+  (showSma1Change)="showSma1 = $event"
+  [sma1Period]="sma1Period"
+  (sma1PeriodChange)="sma1Period = $event"
+  [showSma2]="showSma2"
+  (showSma2Change)="showSma2 = $event"
+  [sma2Period]="sma2Period"
+  (sma2PeriodChange)="sma2Period = $event"
+  [showSma3]="showSma3"
+  (showSma3Change)="showSma3 = $event"
+  [sma3Period]="sma3Period"
+  (sma3PeriodChange)="sma3Period = $event"
+  [showSma4]="showSma4"
+  (showSma4Change)="showSma4 = $event"
+  [sma4Period]="sma4Period"
+  (sma4PeriodChange)="sma4Period = $event"
+  [showSma5]="showSma5"
+  (showSma5Change)="showSma5 = $event"
+  [sma5Period]="sma5Period"
+  (sma5PeriodChange)="sma5Period = $event"
+  (close)="showPanel = false"
+></app-settings-panel>
+
+<as-split direction="horizontal" [gutterSize]="4" class="main-content">
+  <as-split-area [size]="88" minSize="300">
+    <div class="chart-area">
+      <app-stock-chart
+        [symbol]="symbol"
+        [range]="range"
+        [timeframe]="timeframe"
+        [showDMark]="showDMark"
+        [showSma1]="showSma1"
+        [sma1Period]="sma1Period"
+        [showSma2]="showSma2"
+        [sma2Period]="sma2Period"
+        [showSma3]="showSma3"
+        [sma3Period]="sma3Period"
+        [showSma4]="showSma4"
+        [sma4Period]="sma4Period"
+        [showSma5]="showSma5"
+        [sma5Period]="sma5Period"
+        (latestBar)="onLatestBar($event)"
+        (barClicked)="onLatestBar($event)"
+      ></app-stock-chart>
+    </div>
+  </as-split-area>
+  <as-split-area [size]="12" minSize="160" maxSize="320" *ngIf="showWatchlist">
+    <div class="watchlist-area">
+      <app-watchlist-panel
+        [symbols]="watchlist"
+        (select)="onWatchlistSelect($event)"
+        (close)="showWatchlist = false"
+        (addToDB)="addToWatchlist($event)"
+        (removeFromDB)="removeFromWatchlist($event)"
+      ></app-watchlist-panel>
+    </div>
+  </as-split-area>
+</as-split>

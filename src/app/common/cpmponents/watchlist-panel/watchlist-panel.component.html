@@ -1,0 +1,58 @@
+<div class="watchlist-panel">
+  <div class="watchlist-header">
+    <span>Watchlist</span>
+    <button (click)="close.emit()">✖</button>
+  </div>
+  <input
+    [(ngModel)]="newSymbol"
+    placeholder="Add symbol"
+    (keyup.enter)="addNewSymbol()"
+  />
+  <button (click)="addNewSymbol()">Add</button>
+  <table class="watchlist-table">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Last</th>
+        <th>Chg</th>
+        <th>Chg%</th>
+        <th>Ext</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        *ngFor="let item of symbols; let i = index"
+        (dblclick)="select.emit(item.symbol)"
+      >
+        <td>{{ item.symbol }}</td>
+        <td
+          [ngClass]="{ 'quote-up': item.chg > 0, 'quote-down': item.chg < 0 }"
+        >
+          {{ item.last | number : "1.2-2" }}
+        </td>
+        <td
+          [ngClass]="{ 'quote-up': item.chg > 0, 'quote-down': item.chg < 0 }"
+        >
+          {{ item.chg | number : "1.2-2" }}
+        </td>
+        <td
+          [ngClass]="{
+            'quote-up': item.chgPct > 0,
+            'quote-down': item.chgPct < 0
+          }"
+        >
+          {{ item.chgPct | number : "1.2-2" }}%
+        </td>
+        <td
+          [ngClass]="{ 'quote-up': item.ext > 0, 'quote-down': item.ext < 0 }"
+        >
+          {{ item.ext | number : "1.2-2" }}
+        </td>
+        <td>
+          <button (click)="remove(i); $event.stopPropagation()">❌</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

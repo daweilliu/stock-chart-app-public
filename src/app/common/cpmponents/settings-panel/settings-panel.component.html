@@ -1,0 +1,118 @@
+<div class="settings-panel">
+  <label>
+    <input
+      type="checkbox"
+      [checked]="showDMark"
+      (change)="onCheckboxChange($event, showDMarkChange)"
+    />
+    Show D-Mark
+  </label>
+  <br />
+
+  <label>
+    <input
+      type="checkbox"
+      [checked]="showSma1"
+      (change)="onCheckboxChange($event, showSma1Change)"
+    />
+    Show SMA1
+  </label>
+  <label>
+    SMA1:
+    <input
+      type="number"
+      min="2"
+      max="300"
+      [(ngModel)]="sma1Period"
+      (ngModelChange)="sma1PeriodChange.emit($event)"
+      style="width: 30px; margin-left: 6px"
+    />
+  </label>
+  <br />
+
+  <label>
+    <input
+      type="checkbox"
+      [checked]="showSma2"
+      (change)="onCheckboxChange($event, showSma2Change)"
+    />
+    Show SMA2
+  </label>
+  <label>
+    SMA2:
+    <input
+      type="number"
+      min="2"
+      max="300"
+      [(ngModel)]="sma2Period"
+      (ngModelChange)="sma2PeriodChange.emit($event)"
+      style="width: 30px; margin-left: 6px"
+    />
+  </label>
+  <br />
+
+  <label>
+    <input
+      type="checkbox"
+      [checked]="showSma3"
+      (change)="onCheckboxChange($event, showSma3Change)"
+    />
+    Show SMA3
+  </label>
+  <label>
+    SMA3:
+    <input
+      type="number"
+      min="2"
+      max="300"
+      [(ngModel)]="sma3Period"
+      (ngModelChange)="sma3PeriodChange.emit($event)"
+      style="width: 30px; margin-left: 6px"
+    />
+  </label>
+  <br />
+
+  <label>
+    <input
+      type="checkbox"
+      [checked]="showSma4"
+      (change)="onCheckboxChange($event, showSma4Change)"
+    />
+    Show SMA4
+  </label>
+  <label>
+    SMA4:
+    <input
+      type="number"
+      min="2"
+      max="300"
+      [(ngModel)]="sma4Period"
+      (ngModelChange)="sma4PeriodChange.emit($event)"
+      style="width: 30px; margin-left: 6px"
+    />
+  </label>
+  <br />
+
+  <label>
+    <input
+      type="checkbox"
+      [checked]="showSma5"
+      (change)="onCheckboxChange($event, showSma5Change)"
+    />
+    Show SMA5
+  </label>
+  <label>
+    SMA5:
+    <input
+      type="number"
+      min="2"
+      max="300"
+      [(ngModel)]="sma5Period"
+      (ngModelChange)="sma5PeriodChange.emit($event)"
+      style="width: 30px; margin-left: 6px"
+    />
+  </label>
+  <br />
+
+  <button (click)="closePanel()" style="margin-top: 10px">Close</button>
+</div>
