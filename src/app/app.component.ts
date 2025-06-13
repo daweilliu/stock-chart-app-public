@@ -182,8 +182,8 @@ export class AppComponent implements OnInit {
     this.latestBarColor = bar.color || '#1aff1a'; // fallback if color not provided
   }
 
-  onWatchlistSelect(symbol: string) {
+  async onWatchlistSelect(symbol: string) {
     this.symbol = symbol;
-    this.fetchFullName(symbol);
+    await this.fetchFullName(symbol);
   }
 }
