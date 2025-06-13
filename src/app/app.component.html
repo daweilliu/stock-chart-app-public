@@ -45,7 +45,7 @@
   (showSma5Change)="showSma5 = $event"
   [sma5Period]="sma5Period"
   (sma5PeriodChange)="sma5Period = $event"
-  (close)="showPanel = false"
+  (apply)="onSettingsApply()"
 ></app-settings-panel>
 
 <as-split direction="horizontal" [gutterSize]="4" class="main-content">

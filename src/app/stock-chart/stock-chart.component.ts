@@ -58,6 +58,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
 
   showWatchlist = false;
   watchlist: string[] = ['AAPL', 'MSFT', 'GOOG'];
+  showPanel = false;
 
   constructor(
     private chartService: StockChartService,
@@ -110,5 +111,10 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
     // Optionally reload chart data here if needed
     this.loadSymbolData();
     this.showWatchlist = false;
+  }
+
+  reload() {
+    this.loadSymbolData();
+    this.showPanel = false;
   }
 }

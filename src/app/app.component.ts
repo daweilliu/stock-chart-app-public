@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { AngularSplitModule } from 'angular-split';
 import { StockChartComponent } from './stock-chart/stock-chart.component';
 import { SettingsPanelComponent } from './common/cpmponents/settings-panel/settings-panel.component';
@@ -25,6 +25,7 @@ import { AppHeaderComponent } from './common/cpmponents/app-header/app-header.co
   ],
 })
 export class AppComponent implements OnInit {
+  @ViewChild(StockChartComponent) chartComponent!: StockChartComponent;
   // Symbol and range
   symbol = 'AAPL';
   range: '1y' | '5y' | 'max' | 'ytd' | '2y' | '10y' = '1y';
@@ -187,5 +188,12 @@ export class AppComponent implements OnInit {
   async onWatchlistSelect(symbol: string) {
     this.symbol = symbol;
     await this.fetchFullName(symbol);
+  }
+
+  onSettingsApply() {
+    this.showPanel = false; // Optionally close the panel after applying
+    if (this.chartComponent) {
+      this.chartComponent.reload();
+    }
   }
 }

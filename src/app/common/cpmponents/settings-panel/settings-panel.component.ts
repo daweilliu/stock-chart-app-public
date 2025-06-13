@@ -35,6 +35,7 @@ export class SettingsPanelComponent {
   @Output() showSma5Change = new EventEmitter<boolean>();
   @Output() sma5PeriodChange = new EventEmitter<number>();
   @Output() close = new EventEmitter<void>();
+  @Output() apply = new EventEmitter<void>();
 
   onCheckboxChange(event: Event, emitter: EventEmitter<boolean>) {
     emitter.emit((event.target as HTMLInputElement).checked);
@@ -42,5 +43,8 @@ export class SettingsPanelComponent {
 
   closePanel() {
     this.close.emit();
+  }
+  applySettings() {
+    this.apply.emit();
   }
 }
