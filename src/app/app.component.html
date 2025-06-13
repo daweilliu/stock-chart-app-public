@@ -1,52 +1,25 @@
-<div class="header-bar">
-  <div class="header-left">
-    <input
-      class="symbol-input"
-      [(ngModel)]="symbol"
-      placeholder="Stock Symbol"
-      style="width: 100px; margin-right: 8px"
-      (keyup.enter)="loadSymbol()"
-    />
-
-    <select
-      [(ngModel)]="range"
-      style="margin-right: 8px"
-      (change)="onRangeChange()"
-    >
-      <option value="1y">1 Year</option>
-      <option value="2y">2 Years</option>
-      <option value="5y">5 Years</option>
-      <option value="10y">10 Years</option>
-      <option value="max">Max</option>
-      <option value="ytd">Year to Date</option>
-    </select>
-
-    <select [(ngModel)]="timeframe" style="margin-right: 8px">
-      <option value="daily">Daily</option>
-      <option value="weekly">Weekly</option>
-      <option value="monthly">Monthly</option>
-    </select>
-    <span class="price-info"> {{ fullName }}</span>
-  </div>
-  <span class="price-info" *ngIf="!isLoadingName">
-    <span
-      *ngIf="latestHigh && latestLow && latestOpen && latestClose"
-      [style.color]="latestBarColor"
-    >
-      H=${{ latestHigh | number : "1.2-2" }} L=${{
-        latestLow | number : "1.2-2"
-      }}
-      O=${{ latestOpen | number : "1.2-2" }} C=${{
-        latestClose | number : "1.2-2"
-      }}
-      ({{ latestChangePct | number : "1.2-2" }}%)
-    </span>
-  </span>
-  <div class="header-right">
-    <button (click)="showPanel = !showPanel">⚙️ Settings</button>
-    <button (click)="showWatchlist = !showWatchlist">📋 Watchlist</button>
-  </div>
-</div>
+<app-header
+  [symbol]="symbol"
+  [range]="range"
+  [timeframe]="timeframe"
+  [fullName]="fullName"
+  [isLoadingName]="isLoadingName"
+  [latestHigh]="latestHigh"
+  [latestLow]="latestLow"
+  [latestOpen]="latestOpen"
+  [latestClose]="latestClose"
+  [latestChangePct]="latestChangePct"
+  [latestBarColor]="latestBarColor"
+  [showPanel]="showPanel"
+  [showWatchlist]="showWatchlist"
+  (symbolChange)="symbol = $event"
+  (rangeChange)="range = $event"
+  (timeframeChange)="timeframe = $event"
+  (showPanelChange)="showPanel = $event"
+  (showWatchlistChange)="showWatchlist = $event"
+  (loadSymbol)="loadSymbol()"
+  (onRangeChange)="onRangeChange()"
+></app-header>
 
 <app-settings-panel
   *ngIf="showPanel"

@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { StockDataService } from './services/stock-data.service';
 import { HttpClient } from '@angular/common/http';
+import { AppHeaderComponent } from './common/cpmponents/app-header/app-header.component';
 
 @Component({
   standalone: true,
@@ -14,6 +15,7 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   imports: [
+    AppHeaderComponent,
     AngularSplitModule,
     StockChartComponent,
     SettingsPanelComponent,

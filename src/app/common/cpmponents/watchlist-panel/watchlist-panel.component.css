@@ -82,3 +82,12 @@ li button:hover {
 .quote-down {
   color: #ff3333;
 }
+
+.watchlist-input {
+  width: 100px;
+  padding: 4px 4px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}

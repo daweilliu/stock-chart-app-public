@@ -1,0 +1,55 @@
+<div class="header-bar">
+  <div class="header-left">
+    <input
+      class="symbol-input"
+      [value]="symbol"
+      (input)="onSymbolInput($event)"
+      placeholder="Stock Symbol"
+      style="width: 100px; margin-right: 8px"
+      (keyup.enter)="triggerLoadSymbol()"
+    />
+
+    <select
+      [value]="range"
+      (change)="onRangeInput($event)"
+      style="margin-right: 8px"
+    >
+      <option value="1y">1 Year</option>
+      <option value="2y">2 Years</option>
+      <option value="5y">5 Years</option>
+      <option value="10y">10 Years</option>
+      <option value="max">Max</option>
+      <option value="ytd">Year to Date</option>
+    </select>
+
+    <select
+      [value]="timeframe"
+      (change)="onTimeframeInput($event)"
+      style="margin-right: 8px"
+    >
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+
+    <span class="price-info" style="margin-left: 12px">{{ fullName }}</span>
+  </div>
+  <span class="price-info" *ngIf="!isLoadingName">
+    <span
+      *ngIf="latestHigh && latestLow && latestOpen && latestClose"
+      [style.color]="latestBarColor"
+    >
+      H=${{ latestHigh | number : "1.2-2" }} L=${{
+        latestLow | number : "1.2-2"
+      }}
+      O=${{ latestOpen | number : "1.2-2" }} C=${{
+        latestClose | number : "1.2-2"
+      }}
+      ({{ latestChangePct | number : "1.2-2" }}%)
+    </span>
+  </span>
+  <div class="header-right">
+    <button (click)="togglePanel()">⚙️ Settings</button>
+    <button (click)="toggleWatchlist()">📋 Watchlist</button>
+  </div>
+</div>

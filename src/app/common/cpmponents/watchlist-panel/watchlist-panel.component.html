@@ -4,6 +4,7 @@
     <button (click)="close.emit()">✖</button>
   </div>
   <input
+    class="watchlist-input"
     [(ngModel)]="newSymbol"
     placeholder="Add symbol"
     (keyup.enter)="addNewSymbol()"
