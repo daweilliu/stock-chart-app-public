@@ -30,7 +30,7 @@ export class WatchlistPanelComponent implements OnInit {
 
   ngOnInit() {
     this.updateWatchlistData();
-    interval(1000000).subscribe(() => this.updateWatchlistData());
+    interval(10000000).subscribe(() => this.updateWatchlistData());
   }
 
   addNewSymbol() {

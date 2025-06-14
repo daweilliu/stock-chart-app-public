@@ -6,11 +6,9 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './settings-panel.component.html',
   styleUrls: ['./settings-panel.component.css'],
   standalone: true,
-  imports: [FormsModule], // <-- Add this line
+  imports: [FormsModule],
 })
 export class SettingsPanelComponent {
-  //@Input() range: '1d' | '5d' | '1mo' | '6mo' | '1y' | '5y' | 'max' = '1mo';
-
   @Input() showDMark: boolean = false;
   @Input() showSma1: boolean = true;
   @Input() sma1Period: number = 5;
@@ -37,13 +35,6 @@ export class SettingsPanelComponent {
   @Output() close = new EventEmitter<void>();
   @Output() apply = new EventEmitter<void>();
 
-  onCheckboxChange(event: Event, emitter: EventEmitter<boolean>) {
-    emitter.emit((event.target as HTMLInputElement).checked);
-  }
-
-  closePanel() {
-    this.close.emit();
-  }
   applySettings() {
     this.apply.emit();
   }

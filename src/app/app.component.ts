@@ -185,9 +185,12 @@ export class AppComponent implements OnInit {
     this.latestBarColor = bar.color || '#1aff1a'; // fallback if color not provided
   }
 
-  async onWatchlistSelect(symbol: string) {
+  onWatchlistSelect(symbol: string) {
     this.symbol = symbol;
-    await this.fetchFullName(symbol);
+    if (this.chartComponent) {
+      this.chartComponent.onWatchlistSelect(symbol);
+      this.fetchFullName(symbol);
+    }
   }
 
   onSettingsApply() {

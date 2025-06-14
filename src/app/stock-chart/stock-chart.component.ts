@@ -71,10 +71,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (
-      (changes['symbol'] || changes['range'] || changes['timeframe']) &&
-      this.chartContainer
-    ) {
+    if (changes['timeframe'] && this.chartContainer) {
       if (this.chartService.chart) {
         this.chartService.chart.remove();
       }
@@ -83,9 +80,9 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  loadSymbolData() {
+  loadSymbolData(symbol: string = this.symbol) {
     loadSymbolDataExternal(
-      this.symbol,
+      symbol,
       this.range,
       this.timeframe,
       this.showSma1,
@@ -107,9 +104,11 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
   }
 
   onWatchlistSelect(symbol: string) {
-    this.symbol = symbol;
-    // Optionally reload chart data here if needed
-    this.loadSymbolData();
+    if (this.chartService.chart) {
+      this.chartService.chart.remove();
+    }
+    this.chartService.initChart(this.chartContainer.nativeElement);
+    this.loadSymbolData(symbol);
     this.showWatchlist = false;
   }
 

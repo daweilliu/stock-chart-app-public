@@ -60,7 +60,7 @@ export function loadSymbolDataExternal(
     .getTimeSeries(symbol, interval, outputsize)
     .subscribe((res: any) => {
       if (!res.values || !Array.isArray(res.values)) {
-        console.warn('No data received for chart');
+        console.warn(`No data received for symbol: ${symbol} : ${res.message}`);
         return;
       }
       const reversedValues = res.values.reverse();

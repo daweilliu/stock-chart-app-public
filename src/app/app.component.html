@@ -20,34 +20,6 @@
   (loadSymbol)="loadSymbol()"
   (onRangeChange)="onRangeChange()"
 ></app-header>
-
-<app-settings-panel
-  *ngIf="showPanel"
-  [showDMark]="showDMark"
-  (showDMarkChange)="showDMark = $event"
-  [showSma1]="showSma1"
-  (showSma1Change)="showSma1 = $event"
-  [sma1Period]="sma1Period"
-  (sma1PeriodChange)="sma1Period = $event"
-  [showSma2]="showSma2"
-  (showSma2Change)="showSma2 = $event"
-  [sma2Period]="sma2Period"
-  (sma2PeriodChange)="sma2Period = $event"
-  [showSma3]="showSma3"
-  (showSma3Change)="showSma3 = $event"
-  [sma3Period]="sma3Period"
-  (sma3PeriodChange)="sma3Period = $event"
-  [showSma4]="showSma4"
-  (showSma4Change)="showSma4 = $event"
-  [sma4Period]="sma4Period"
-  (sma4PeriodChange)="sma4Period = $event"
-  [showSma5]="showSma5"
-  (showSma5Change)="showSma5 = $event"
-  [sma5Period]="sma5Period"
-  (sma5PeriodChange)="sma5Period = $event"
-  (apply)="onSettingsApply()"
-></app-settings-panel>
-
 <as-split direction="horizontal" [gutterSize]="4" class="main-content">
   <as-split-area [size]="88" minSize="300">
     <div class="chart-area">
@@ -71,9 +43,37 @@
       ></app-stock-chart>
     </div>
   </as-split-area>
-  <as-split-area [size]="12" minSize="160" maxSize="320" *ngIf="showWatchlist">
-    <div class="watchlist-area">
+  <as-split-area [size]="12" minSize="160" maxSize="320">
+    <div class="side-panel-area">
+      <app-settings-panel
+        *ngIf="showPanel && !showWatchlist"
+        [showDMark]="showDMark"
+        (showDMarkChange)="showDMark = $event"
+        [showSma1]="showSma1"
+        (showSma1Change)="showSma1 = $event"
+        [sma1Period]="sma1Period"
+        (sma1PeriodChange)="sma1Period = $event"
+        [showSma2]="showSma2"
+        (showSma2Change)="showSma2 = $event"
+        [sma2Period]="sma2Period"
+        (sma2PeriodChange)="sma2Period = $event"
+        [showSma3]="showSma3"
+        (showSma3Change)="showSma3 = $event"
+        [sma3Period]="sma3Period"
+        (sma3PeriodChange)="sma3Period = $event"
+        [showSma4]="showSma4"
+        (showSma4Change)="showSma4 = $event"
+        [sma4Period]="sma4Period"
+        (sma4PeriodChange)="sma4Period = $event"
+        [showSma5]="showSma5"
+        (showSma5Change)="showSma5 = $event"
+        [sma5Period]="sma5Period"
+        (sma5PeriodChange)="sma5Period = $event"
+        (apply)="onSettingsApply()"
+        (close)="showPanel = false"
+      ></app-settings-panel>
       <app-watchlist-panel
+        *ngIf="showWatchlist && !showPanel"
         [symbols]="watchlist"
         (select)="onWatchlistSelect($event)"
         (close)="showWatchlist = false"

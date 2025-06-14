@@ -1,22 +1,22 @@
 <div class="watchlist-panel">
-  <div class="watchlist-header">
-    <span>Watchlist</span>
-    <button (click)="close.emit()">✖</button>
+  <h3>Watchlist</h3>
+  <div style="margin-bottom: 12px">
+    <input
+      class="watchlist-input"
+      [(ngModel)]="newSymbol"
+      placeholder="Add symbol"
+      (keyup.enter)="addNewSymbol()"
+      style="width: 100px"
+    />
+    <button (click)="addNewSymbol()">Add</button>
   </div>
-  <input
-    class="watchlist-input"
-    [(ngModel)]="newSymbol"
-    placeholder="Add symbol"
-    (keyup.enter)="addNewSymbol()"
-  />
-
-  <table class="watchlist-table">
+  <table style="width: 100%">
     <thead>
       <tr>
         <th>Symbol</th>
         <th>Last</th>
         <th>Chg</th>
-        <th>Chg%</th>
+        <th>%</th>
         <th>Ext</th>
         <th></th>
       </tr>
@@ -24,36 +24,22 @@
     <tbody>
       <tr
         *ngFor="let item of symbols; let i = index"
-        (click)="select.emit(item.symbol)"
+        (dblclick)="select.emit(item.symbol)"
       >
         <td>{{ item.symbol }}</td>
-        <td
-          [ngClass]="{ 'quote-up': item.chg > 0, 'quote-down': item.chg < 0 }"
-        >
-          {{ item.last | number : "1.2-2" }}
+        <td>{{ item.last }}</td>
+        <td [style.color]="item.chg > 0 ? '#1aff1a' : '#ff3333'">
+          {{ item.chg }}
         </td>
-        <td
-          [ngClass]="{ 'quote-up': item.chg > 0, 'quote-down': item.chg < 0 }"
-        >
-          {{ item.chg | number : "1.2-2" }}
-        </td>
-        <td
-          [ngClass]="{
-            'quote-up': item.chgPct > 0,
-            'quote-down': item.chgPct < 0
-          }"
-        >
+        <td [style.color]="item.chgPct > 0 ? '#1aff1a' : '#ff3333'">
           {{ item.chgPct | number : "1.2-2" }}%
         </td>
-        <td
-          [ngClass]="{ 'quote-up': item.ext > 0, 'quote-down': item.ext < 0 }"
-        >
-          {{ item.ext | number : "1.2-2" }}
-        </td>
+        <td>{{ item.ext }}</td>
         <td>
-          <button (click)="remove(i); $event.stopPropagation()">❌</button>
+          <button (click)="remove(i); $event.stopPropagation()">✖</button>
         </td>
       </tr>
     </tbody>
   </table>
+  <button style="margin-top: 12px" (click)="close.emit()">Close</button>
 </div>

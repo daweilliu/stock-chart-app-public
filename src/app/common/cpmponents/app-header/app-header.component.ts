@@ -21,8 +21,8 @@ export class AppHeaderComponent {
   @Input() latestClose!: number;
   @Input() latestChangePct!: number;
   @Input() latestBarColor!: string;
-  @Input() showPanel!: boolean;
-  @Input() showWatchlist!: boolean;
+  @Input() showPanel: boolean = false;
+  @Input() showWatchlist: boolean = false;
 
   @Output() symbolChange = new EventEmitter<string>();
   @Output() rangeChange = new EventEmitter<

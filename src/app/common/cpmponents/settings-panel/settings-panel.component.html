@@ -1,113 +1,104 @@
 <div class="settings-panel">
-  <label>
-    <input
-      type="checkbox"
-      [checked]="showDMark"
-      (change)="onCheckboxChange($event, showDMarkChange)"
-    />
-    Show D-Mark
-  </label>
-  <br />
-
-  <label>
-    <input
-      type="checkbox"
-      [checked]="showSma1"
-      (change)="onCheckboxChange($event, showSma1Change)"
-    />
-    Show SMA1
-  </label>
-  <label>
+  <h3>Chart Settings</h3>
+  <div>
+    <label>
+      <input
+        type="checkbox"
+        [(ngModel)]="showDMark"
+        (change)="showDMarkChange.emit(showDMark)"
+      />
+      Show D-Mark
+    </label>
+  </div>
+  <div>
+    <label>
+      <input
+        type="checkbox"
+        [(ngModel)]="showSma1"
+        (change)="showSma1Change.emit(showSma1)"
+      />
+      SMA1
+    </label>
     <input
       type="number"
-      min="2"
-      max="300"
+      min="1"
+      max="500"
       [(ngModel)]="sma1Period"
-      (ngModelChange)="sma1PeriodChange.emit($event)"
-      style="width: 40px; margin-left: 6px"
+      (change)="sma1PeriodChange.emit(sma1Period)"
+      style="width: 60px; margin-left: 8px"
     />
-  </label>
-  <br />
-
-  <label>
-    <input
-      type="checkbox"
-      [checked]="showSma2"
-      (change)="onCheckboxChange($event, showSma2Change)"
-    />
-    Show SMA2
-  </label>
-  <label>
+  </div>
+  <div>
+    <label>
+      <input
+        type="checkbox"
+        [(ngModel)]="showSma2"
+        (change)="showSma2Change.emit(showSma2)"
+      />
+      SMA2
+    </label>
     <input
       type="number"
-      min="2"
-      max="300"
+      min="1"
+      max="500"
       [(ngModel)]="sma2Period"
-      (ngModelChange)="sma2PeriodChange.emit($event)"
-      style="width: 40px; margin-left: 6px"
+      (change)="sma2PeriodChange.emit(sma2Period)"
+      style="width: 60px; margin-left: 8px"
     />
-  </label>
-  <br />
-
-  <label>
-    <input
-      type="checkbox"
-      [checked]="showSma3"
-      (change)="onCheckboxChange($event, showSma3Change)"
-    />
-    Show SMA3
-  </label>
-  <label>
+  </div>
+  <div>
+    <label>
+      <input
+        type="checkbox"
+        [(ngModel)]="showSma3"
+        (change)="showSma3Change.emit(showSma3)"
+      />
+      SMA3
+    </label>
     <input
       type="number"
-      min="2"
-      max="300"
+      min="1"
+      max="500"
       [(ngModel)]="sma3Period"
-      (ngModelChange)="sma3PeriodChange.emit($event)"
-      style="width: 40px; margin-left: 6px"
+      (change)="sma3PeriodChange.emit(sma3Period)"
+      style="width: 60px; margin-left: 8px"
     />
-  </label>
-  <br />
-
-  <label>
-    <input
-      type="checkbox"
-      [checked]="showSma4"
-      (change)="onCheckboxChange($event, showSma4Change)"
-    />
-    Show SMA4
-  </label>
-  <label>
+  </div>
+  <div>
+    <label>
+      <input
+        type="checkbox"
+        [(ngModel)]="showSma4"
+        (change)="showSma4Change.emit(showSma4)"
+      />
+      SMA4
+    </label>
     <input
       type="number"
-      min="2"
-      max="300"
+      min="1"
+      max="500"
       [(ngModel)]="sma4Period"
-      (ngModelChange)="sma4PeriodChange.emit($event)"
-      style="width: 40px; margin-left: 6px"
+      (change)="sma4PeriodChange.emit(sma4Period)"
+      style="width: 60px; margin-left: 8px"
     />
-  </label>
-  <br />
-
-  <label>
-    <input
-      type="checkbox"
-      [checked]="showSma5"
-      (change)="onCheckboxChange($event, showSma5Change)"
-    />
-    Show SMA5
-  </label>
-  <label>
+  </div>
+  <div>
+    <label>
+      <input
+        type="checkbox"
+        [(ngModel)]="showSma5"
+        (change)="showSma5Change.emit(showSma5)"
+      />
+      SMA5
+    </label>
     <input
       type="number"
-      min="2"
-      max="300"
+      min="1"
+      max="500"
       [(ngModel)]="sma5Period"
-      (ngModelChange)="sma5PeriodChange.emit($event)"
-      style="width: 40px; margin-left: 6px"
+      (change)="sma5PeriodChange.emit(sma5Period)"
+      style="width: 60px; margin-left: 8px"
     />
-  </label>
-  <br />
-
-  <button (click)="applySettings()" style="margin-top: 10px">Apply</button>
+  </div>
+  <button (click)="applySettings()">Apply</button>
 </div>
