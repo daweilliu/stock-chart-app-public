@@ -15,8 +15,8 @@
   (symbolChange)="symbol = $event"
   (rangeChange)="range = $event"
   (timeframeChange)="timeframe = $event"
-  (showPanelChange)="showPanel = $event"
-  (showWatchlistChange)="showWatchlist = $event"
+  (showPanelChange)="toggleSettingsPanel()"
+  (showWatchlistChange)="toggleWatchlistPanel()"
   (loadSymbol)="loadSymbol()"
   (onRangeChange)="onRangeChange()"
 ></app-header>
@@ -81,13 +81,13 @@
         [sma5Period]="sma5Period"
         (sma5PeriodChange)="sma5Period = $event"
         (apply)="onSettingsApply()"
-        (close)="showPanel = false"
+        (close)="toggleSettingsPanel()"
       ></app-settings-panel>
       <app-watchlist-panel
         *ngIf="showWatchlist && !showPanel"
         [symbols]="watchlist"
         (select)="onWatchlistSelect($event)"
-        (close)="showWatchlist = false"
+        (close)="toggleWatchlistPanel()"
         (addToDB)="addToWatchlist($event)"
         (removeFromDB)="removeFromWatchlist($event)"
       ></app-watchlist-panel>

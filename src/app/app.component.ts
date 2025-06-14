@@ -197,6 +197,11 @@ export class AppComponent implements OnInit {
     this.showPanel = false; // Optionally close the panel after applying
     if (this.chartComponent) {
       this.chartComponent.reload();
+      setTimeout(() => {
+        if (this.chartComponent && this.chartComponent.resizeChart) {
+          this.chartComponent.resizeChart();
+        }
+      }, 0);
     }
   }
 
@@ -204,5 +209,23 @@ export class AppComponent implements OnInit {
     if (this.chartComponent && this.chartComponent.resizeChart) {
       this.chartComponent.resizeChart();
     }
+  }
+
+  toggleSettingsPanel() {
+    this.showPanel = !this.showPanel;
+    setTimeout(() => {
+      if (this.chartComponent && this.chartComponent.resizeChart) {
+        this.chartComponent.resizeChart();
+      }
+    }, 0);
+  }
+
+  toggleWatchlistPanel() {
+    this.showWatchlist = !this.showWatchlist;
+    setTimeout(() => {
+      if (this.chartComponent && this.chartComponent.resizeChart) {
+        this.chartComponent.resizeChart();
+      }
+    }, 0);
   }
 }
