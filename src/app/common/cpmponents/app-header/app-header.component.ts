@@ -54,10 +54,20 @@ export class AppHeaderComponent {
   }
 
   togglePanel() {
-    this.showPanelChange.emit(!this.showPanel);
+    if (this.showWatchlist) {
+      this.showWatchlist = false;
+      this.showWatchlistChange.emit(false);
+    }
+    this.showPanel = !this.showPanel;
+    this.showPanelChange.emit(this.showPanel);
   }
 
   toggleWatchlist() {
-    this.showWatchlistChange.emit(!this.showWatchlist);
+    if (this.showPanel) {
+      this.showPanel = false;
+      this.showPanelChange.emit(false);
+    }
+    this.showWatchlist = !this.showWatchlist;
+    this.showWatchlistChange.emit(this.showWatchlist);
   }
 }
