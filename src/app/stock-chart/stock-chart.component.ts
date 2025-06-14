@@ -69,6 +69,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
   ngAfterViewInit(): void {
     this.chartService.initChart(this.chartContainer.nativeElement);
     this.loadSymbolData();
+    this.resizeChart();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -78,6 +79,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
       }
       this.chartService.initChart(this.chartContainer.nativeElement);
       this.loadSymbolData();
+      this.resizeChart();
     }
   }
 

@@ -60,3 +60,20 @@ as-split-area {
   padding: 0;
   margin: 0;
 }
+
+.chart-area,
+.chart-container {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+  height: 100% !important;
+}
+
+/* Force all canvases to fill their parent */
+canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+}

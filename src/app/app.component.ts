@@ -118,6 +118,11 @@ export class AppComponent implements OnInit {
     if (this.chartComponent) {
       this.chartComponent.onWatchlistSelect(symbol);
       this.fetchFullName(symbol);
+      setTimeout(() => {
+        if (this.chartComponent && this.chartComponent.resizeChart) {
+          this.chartComponent.resizeChart();
+        }
+      }, 0);
     }
   }
 
@@ -193,6 +198,11 @@ export class AppComponent implements OnInit {
     this.symbol = symbol;
     if (this.chartComponent) {
       this.chartComponent.onWatchlistSelect(symbol);
+      setTimeout(() => {
+        if (this.chartComponent && this.chartComponent.resizeChart) {
+          this.chartComponent.resizeChart();
+        }
+      }, 0);
       this.fetchFullName(symbol);
     }
   }
