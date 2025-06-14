@@ -48,6 +48,7 @@ export function loadSymbolDataExternal(
   showSma5: boolean,
   sma5Period: number,
   showDMark: boolean,
+  showVolumeOverlap: boolean,
   chartService: StockChartService,
   dataService: StockDataService,
   latestBar: EventEmitter<any>,
@@ -113,7 +114,7 @@ export function loadSymbolDataExternal(
         });
       }
 
-      chartService.setVolumeData(volumeData);
+      if (showVolumeOverlap) chartService.setVolumeData(volumeData);
 
       if (showSma1) chartService.addSmaLine(data, sma1Period, 'orange');
       if (showSma2) chartService.addSmaLine(data, sma2Period, 'blue');

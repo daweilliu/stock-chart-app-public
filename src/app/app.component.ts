@@ -49,6 +49,7 @@ export class AppComponent implements OnInit {
 
   // SMA and D-Mark settings
   showDMark = false;
+  showVolumeOverlap = false;
   showSma1 = true;
   showSma2 = false;
   showSma3 = false;

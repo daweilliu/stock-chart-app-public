@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class SettingsPanelComponent {
   @Input() showDMark: boolean = false;
+  @Input() showVolumeOverlap: boolean = false;
   @Input() showSma1: boolean = true;
   @Input() sma1Period: number = 5;
   @Input() showSma2: boolean = false;
@@ -22,6 +23,7 @@ export class SettingsPanelComponent {
   @Input() sma5Period: number = 240;
 
   @Output() showDMarkChange = new EventEmitter<boolean>();
+  @Output() showVolumeOverlapChange = new EventEmitter<boolean>();
   @Output() showSma1Change = new EventEmitter<boolean>();
   @Output() sma1PeriodChange = new EventEmitter<number>();
   @Output() showSma2Change = new EventEmitter<boolean>();
@@ -32,6 +34,7 @@ export class SettingsPanelComponent {
   @Output() sma4PeriodChange = new EventEmitter<number>();
   @Output() showSma5Change = new EventEmitter<boolean>();
   @Output() sma5PeriodChange = new EventEmitter<number>();
+
   @Output() close = new EventEmitter<void>();
   @Output() apply = new EventEmitter<void>();
 

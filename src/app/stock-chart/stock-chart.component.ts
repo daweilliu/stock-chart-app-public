@@ -32,6 +32,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
   @Input() range: 'ytd' | '1y' | '2y' | '5y' | '10y' | 'max' = '10y';
   @Input() timeframe: 'daily' | 'weekly' | 'monthly' = 'daily';
   @Input() showDMark: boolean = true;
+  @Input() showVolumeOverlap: boolean = true;
   @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
   @Input() sma1Period: number = 5;
   @Input() showSma1: boolean = true;
@@ -96,6 +97,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
       this.showSma5,
       this.sma5Period,
       this.showDMark,
+      this.showVolumeOverlap,
       this.chartService,
       this.dataService,
       this.latestBar,
