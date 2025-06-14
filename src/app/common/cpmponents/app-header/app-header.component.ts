@@ -30,7 +30,7 @@ export class AppHeaderComponent {
   >();
   @Output() showPanelChange = new EventEmitter<boolean>();
   @Output() showWatchlistChange = new EventEmitter<boolean>();
-  @Output() loadSymbol = new EventEmitter<void>();
+  @Output() loadSymbol = new EventEmitter<string>();
   @Output() onRangeChange = new EventEmitter<void>();
   @Output() timeframeChange = new EventEmitter<
     'daily' | 'weekly' | 'monthly'
@@ -49,8 +49,8 @@ export class AppHeaderComponent {
     this.timeframeChange.emit(event.target.value);
   }
 
-  triggerLoadSymbol() {
-    this.loadSymbol.emit();
+  triggerLoadSymbol(symbol: string) {
+    this.loadSymbol.emit(symbol);
   }
 
   togglePanel() {

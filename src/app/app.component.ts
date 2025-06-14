@@ -112,9 +112,12 @@ export class AppComponent implements OnInit {
     this.saveWatchlist();
   }
 
-  loadSymbol() {
-    this.symbol = `${this.symbol.toUpperCase().trim()}`;
-    this.fetchFullName(this.symbol);
+  loadSymbol(symbol: string) {
+    this.symbol = `${symbol.toUpperCase().trim()}`;
+    if (this.chartComponent) {
+      this.chartComponent.onWatchlistSelect(symbol);
+      this.fetchFullName(symbol);
+    }
   }
 
   onRangeChange() {
