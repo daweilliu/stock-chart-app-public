@@ -27,7 +27,7 @@
   class="main-content"
   (dragEnd)="onSplitterDragEnd()"
 >
-  <as-split-area [size]="showPanel || showWatchlist ? 88 : 100" minSize="300">
+  <as-split-area [size]="showPanel || showWatchlist ? 85 : 100" minSize="300">
     <div class="chart-area">
       <app-stock-chart
         [symbol]="symbol"
@@ -51,7 +51,7 @@
   </as-split-area>
   <as-split-area
     *ngIf="showPanel || showWatchlist"
-    [size]="12"
+    [size]="15"
     minSize="160"
     maxSize="320"
   >
