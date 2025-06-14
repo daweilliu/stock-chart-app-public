@@ -21,8 +21,13 @@
   (onRangeChange)="onRangeChange()"
 ></app-header>
 
-<as-split direction="horizontal" [gutterSize]="4" class="main-content">
-  <as-split-area [size]="88" minSize="300">
+<as-split
+  direction="horizontal"
+  [gutterSize]="4"
+  class="main-content"
+  (dragEnd)="onSplitterDragEnd()"
+>
+  <as-split-area [size]="showPanel || showWatchlist ? 88 : 100" minSize="300">
     <div class="chart-area">
       <app-stock-chart
         [symbol]="symbol"
@@ -44,8 +49,13 @@
       ></app-stock-chart>
     </div>
   </as-split-area>
-  <as-split-area *ngIf="showPanel || showWatchlist">
-    <div class="side-panel-area" *ngIf="showPanel || showWatchlist">
+  <as-split-area
+    *ngIf="showPanel || showWatchlist"
+    [size]="12"
+    minSize="160"
+    maxSize="320"
+  >
+    <div class="side-panel-area">
       <app-settings-panel
         *ngIf="showPanel && !showWatchlist"
         [showDMark]="showDMark"

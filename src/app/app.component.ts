@@ -199,4 +199,10 @@ export class AppComponent implements OnInit {
       this.chartComponent.reload();
     }
   }
+
+  onSplitterDragEnd() {
+    if (this.chartComponent && this.chartComponent.resizeChart) {
+      this.chartComponent.resizeChart();
+    }
+  }
 }

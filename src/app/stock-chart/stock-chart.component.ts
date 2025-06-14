@@ -116,4 +116,12 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
     this.loadSymbolData();
     this.showPanel = false;
   }
+
+  resizeChart() {
+    if (this.chartService.chart && this.chartContainer) {
+      const width = this.chartContainer.nativeElement.offsetWidth;
+      const height = this.chartContainer.nativeElement.offsetHeight;
+      this.chartService.chart.resize(width, height);
+    }
+  }
 }
