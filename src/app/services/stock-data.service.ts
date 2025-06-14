@@ -4,8 +4,8 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class StockDataService {
-  //private apiKey = '660eb09d9dbb4c20a9a8ac1160837d22';
-  private apiKey = 'cb3cb4c6c14c42b4943e7f0d1bfc5eb3';
+  private apiKey = '660eb09d9dbb4c20a9a8ac1160837d22';
+  //private apiKey = 'cb3cb4c6c14c42b4943e7f0d1bfc5eb3';
   //cb3cb4c6c14c42b4943e7f0d1bfc5eb3 yinghualli
 
   constructor(private http: HttpClient) {}

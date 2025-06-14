@@ -1,85 +1,62 @@
-.header-bar {
+/* Make the root component a flex column */
+:host {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 4px;
-  position: relative;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* Header stays at the top */
+app-header {
+  flex: 0 0 auto;
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.symbol-input {
-  font-size: 0.9rem;
-  height: 22px;
-  line-height: 32px;
-  width: 80px;
-  padding: 0 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-  text-transform: uppercase;
-}
-
+/* Main content (split area) fills the rest */
 .main-content {
-  height: 100vh;
+  flex: 1 1 0;
+  min-height: 0;
   min-width: 0;
+  overflow: hidden;
+  height: 100%;
 }
 
+/* Split and split areas fill available space */
+as-split,
+as-split-area {
+  height: 100% !important;
+  min-height: 0 !important;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Chart area and container fill space, no scrollbars */
 .chart-area {
-  margin-right: 8px;
-  height: 100vh;
-  min-width: 0;
-  overflow: hidden;
-  background: #181818;
-}
-
-.watchlist-area {
-  align-items: flex-start !important;
-  justify-content: flex-start !important;
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-}
-
-/* Splitter gutter styling */
-.as-split-gutter {
-  background: #000 !important;
-  border: none !important;
-}
-.as-split-gutter .as-split-gutter-icon {
-  background: #000 !important;
-}
-.as-split-gutter:after,
-.as-split-gutter:before {
-  background: #000 !important;
-}
-
-/* Hide the gutter when the side panel is collapsed */
-.as-split-area[style*="flex-basis: 0%"] + .as-split-gutter {
-  display: none !important;
-}
-
-.as-split-area {
-  overflow: hidden;
-}
-
-/* Side panel area: no padding/margin/background when hidden */
-.side-panel-area {
-  padding: 0;
-  margin: 0;
-  background: transparent;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #181818;
+  box-sizing: border-box;
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Side panel area */
+.side-panel-area {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: #222;
+  color: #fff;
+  padding: 0;
+  margin: 0;
 }

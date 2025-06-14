@@ -21,79 +21,82 @@
   (onRangeChange)="onRangeChange()"
 ></app-header>
 
-<as-split
-  direction="horizontal"
-  [gutterSize]="4"
-  class="main-content"
-  (dragEnd)="onSplitterDragEnd()"
->
-  <as-split-area [size]="showPanel || showWatchlist ? 85 : 100" minSize="300">
-    <div class="chart-area">
-      <app-stock-chart
-        [symbol]="symbol"
-        [range]="range"
-        [timeframe]="timeframe"
-        [showDMark]="showDMark"
-        [showVolumeOverlap]="showVolumeOverlap"
-        [showSma1]="showSma1"
-        [sma1Period]="sma1Period"
-        [showSma2]="showSma2"
-        [sma2Period]="sma2Period"
-        [showSma3]="showSma3"
-        [sma3Period]="sma3Period"
-        [showSma4]="showSma4"
-        [sma4Period]="sma4Period"
-        [showSma5]="showSma5"
-        [sma5Period]="sma5Period"
-        (latestBar)="onLatestBar($event)"
-        (barClicked)="onLatestBar($event)"
-      ></app-stock-chart>
-    </div>
-  </as-split-area>
-  <as-split-area
-    *ngIf="showPanel || showWatchlist"
-    [size]="15"
-    minSize="160"
-    maxSize="320"
+<div class="main-content">
+  <as-split
+    direction="horizontal"
+    [gutterSize]="4"
+    (dragEnd)="onSplitterDragEnd()"
   >
-    <div class="side-panel-area">
-      <app-settings-panel
-        *ngIf="showPanel && !showWatchlist"
-        [showDMark]="showDMark"
-        (showDMarkChange)="showDMark = $event"
-        [showVolumeOverlap]="showVolumeOverlap"
-        (showVolumeOverlapChange)="showVolumeOverlap = $event"
-        [showSma1]="showSma1"
-        (showSma1Change)="showSma1 = $event"
-        [sma1Period]="sma1Period"
-        (sma1PeriodChange)="sma1Period = $event"
-        [showSma2]="showSma2"
-        (showSma2Change)="showSma2 = $event"
-        [sma2Period]="sma2Period"
-        (sma2PeriodChange)="sma2Period = $event"
-        [showSma3]="showSma3"
-        (showSma3Change)="showSma3 = $event"
-        [sma3Period]="sma3Period"
-        (sma3PeriodChange)="sma3Period = $event"
-        [showSma4]="showSma4"
-        (showSma4Change)="showSma4 = $event"
-        [sma4Period]="sma4Period"
-        (sma4PeriodChange)="sma4Period = $event"
-        [showSma5]="showSma5"
-        (showSma5Change)="showSma5 = $event"
-        [sma5Period]="sma5Period"
-        (sma5PeriodChange)="sma5Period = $event"
-        (apply)="onSettingsApply()"
-        (close)="toggleSettingsPanel()"
-      ></app-settings-panel>
-      <app-watchlist-panel
-        *ngIf="showWatchlist && !showPanel"
-        [symbols]="watchlist"
-        (select)="onWatchlistSelect($event)"
-        (close)="toggleWatchlistPanel()"
-        (addToDB)="addToWatchlist($event)"
-        (removeFromDB)="removeFromWatchlist($event)"
-      ></app-watchlist-panel>
-    </div>
-  </as-split-area>
-</as-split>
+    <as-split-area [size]="showPanel || showWatchlist ? 85 : 100" minSize="300">
+      <div class="chart-area">
+        <div class="chart-container">
+          <app-stock-chart
+            [symbol]="symbol"
+            [range]="range"
+            [timeframe]="timeframe"
+            [showDMark]="showDMark"
+            [showVolumeOverlap]="showVolumeOverlap"
+            [showSma1]="showSma1"
+            [sma1Period]="sma1Period"
+            [showSma2]="showSma2"
+            [sma2Period]="sma2Period"
+            [showSma3]="showSma3"
+            [sma3Period]="sma3Period"
+            [showSma4]="showSma4"
+            [sma4Period]="sma4Period"
+            [showSma5]="showSma5"
+            [sma5Period]="sma5Period"
+            (latestBar)="onLatestBar($event)"
+            (barClicked)="onLatestBar($event)"
+          ></app-stock-chart>
+        </div>
+      </div>
+    </as-split-area>
+    <as-split-area
+      *ngIf="showPanel || showWatchlist"
+      [size]="15"
+      minSize="160"
+      maxSize="320"
+    >
+      <div class="side-panel-area">
+        <app-settings-panel
+          *ngIf="showPanel && !showWatchlist"
+          [showDMark]="showDMark"
+          (showDMarkChange)="showDMark = $event"
+          [showVolumeOverlap]="showVolumeOverlap"
+          (showVolumeOverlapChange)="showVolumeOverlap = $event"
+          [showSma1]="showSma1"
+          (showSma1Change)="showSma1 = $event"
+          [sma1Period]="sma1Period"
+          (sma1PeriodChange)="sma1Period = $event"
+          [showSma2]="showSma2"
+          (showSma2Change)="showSma2 = $event"
+          [sma2Period]="sma2Period"
+          (sma2PeriodChange)="sma2Period = $event"
+          [showSma3]="showSma3"
+          (showSma3Change)="showSma3 = $event"
+          [sma3Period]="sma3Period"
+          (sma3PeriodChange)="sma3Period = $event"
+          [showSma4]="showSma4"
+          (showSma4Change)="showSma4 = $event"
+          [sma4Period]="sma4Period"
+          (sma4PeriodChange)="sma4Period = $event"
+          [showSma5]="showSma5"
+          (showSma5Change)="showSma5 = $event"
+          [sma5Period]="sma5Period"
+          (sma5PeriodChange)="sma5Period = $event"
+          (apply)="onSettingsApply()"
+          (close)="toggleSettingsPanel()"
+        ></app-settings-panel>
+        <app-watchlist-panel
+          *ngIf="showWatchlist && !showPanel"
+          [symbols]="watchlist"
+          (select)="onWatchlistSelect($event)"
+          (close)="toggleWatchlistPanel()"
+          (addToDB)="addToWatchlist($event)"
+          (removeFromDB)="removeFromWatchlist($event)"
+        ></app-watchlist-panel>
+      </div>
+    </as-split-area>
+  </as-split>
+</div>

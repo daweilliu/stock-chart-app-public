@@ -18,14 +18,14 @@ import {
   getInterval,
 } from '../common/chart-helpers';
 
-import { WatchlistPanelComponent } from '../common/cpmponents/watchlist-panel/watchlist-panel.component';
+//import { WatchlistPanelComponent } from '../common/cpmponents/watchlist-panel/watchlist-panel.component';
 
 @Component({
   selector: 'app-stock-chart',
   templateUrl: './stock-chart.component.html',
   styleUrls: ['./stock-chart.component.css'],
   standalone: true,
-  imports: [CommonModule, WatchlistPanelComponent],
+  imports: [CommonModule],
 })
 export class StockChartComponent implements AfterViewInit, OnChanges {
   @Input() symbol: string = 'AAPL';
@@ -115,7 +115,11 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
   }
 
   reload() {
-    this.loadSymbolData();
+    if (this.chartService.chart) {
+      this.chartService.chart.remove();
+    }
+    this.chartService.initChart(this.chartContainer.nativeElement);
+    this.loadSymbolData(this.symbol);
     this.showPanel = false;
   }
 
