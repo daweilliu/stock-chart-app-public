@@ -14,11 +14,12 @@ export class StockChartService {
 
   initChart(container: HTMLElement): IChartApi {
     this.chart = createChart(container, {
-      width: container.clientWidth,
-      height: 750,
+      width: container.offsetWidth,
+      height: container.offsetHeight,
+      rightPriceScale: { visible: false },
+      timeScale: { borderColor: '#71649C', visible: true, rightOffset: 2 }, // Right margin (in bars)
       layout: { background: { color: '#0F0F0F' }, textColor: '#fff' },
       grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } },
-      rightPriceScale: { visible: false },
       leftPriceScale: { visible: true, borderColor: '#555' },
     });
     this.candleSeries = this.chart.addCandlestickSeries({
