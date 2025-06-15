@@ -23,8 +23,11 @@
 
 <div class="main-content">
   <as-split
+    #mySplit
     direction="horizontal"
+    [useTransition]="false"
     [gutterSize]="4"
+    (dragProgress)="onDragProgress($event)"
     (dragEnd)="onSplitterDragEnd()"
   >
     <as-split-area [size]="showPanel || showWatchlist ? 85 : 100" minSize="300">

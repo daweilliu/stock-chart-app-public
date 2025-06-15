@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { AngularSplitModule } from 'angular-split';
 import { StockChartComponent } from './stock-chart/stock-chart.component';
 import { SettingsPanelComponent } from './common/cpmponents/settings-panel/settings-panel.component';
@@ -9,6 +9,8 @@ import { StockDataService } from './services/stock-data.service';
 import { LayoutService } from './services/layout.service';
 import { HttpClient } from '@angular/common/http';
 import { AppHeaderComponent } from './common/cpmponents/app-header/app-header.component';
+import { SplitComponent, SplitGutterInteractionEvent } from 'angular-split';
+import { Subscription } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -25,8 +27,10 @@ import { AppHeaderComponent } from './common/cpmponents/app-header/app-header.co
     CommonModule,
   ],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild(StockChartComponent) chartComponent!: StockChartComponent;
+  @ViewChild('mySplit') mySplit!: SplitComponent;
+
   // Symbol and range
   symbol = '';
   range: '1y' | '5y' | 'max' | 'ytd' | '2y' | '10y' = '1y';
@@ -63,6 +67,7 @@ export class AppComponent implements OnInit {
   userId = 'demo-user'; // Replace with real user id if you have auth
   layoutName = 'default';
   saveStatus: 'idle' | 'saving' | 'success' | 'error' = 'idle';
+  private sub?: Subscription;
   constructor(
     private stockData: StockDataService,
     private layoutService: LayoutService,
@@ -74,6 +79,14 @@ export class AppComponent implements OnInit {
     this.fetchFullName(this.symbol);
     this.onSettingsApply();
     this.loadWatchlist();
+  }
+
+  ngAfterViewInit() {
+    this.sub = this.mySplit.dragProgress$.subscribe((event) => {
+      // If you want to trigger change detection, wrap in ngZone
+      console.log('Splitter drag progress:', event);
+      this.resizeChart();
+    });
   }
 
   saveWatchlist() {
@@ -248,6 +261,9 @@ export class AppComponent implements OnInit {
     if (this.chartComponent && this.chartComponent.resizeChart) {
       this.chartComponent.resizeChart();
     }
+  }
+  onDragProgress(event: Event): void {
+    console.log('✅ Dragging in progress!', event);
   }
 
   toggleSettingsPanel() {
