@@ -33,7 +33,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   // Symbol and range
   symbol = '';
-  range: '1y' | '5y' | 'max' | 'ytd' | '2y' | '10y' = '1y';
+  range: '1y' | '5y' | 'max' | 'ytd' | '2y' | '10y' = 'max';
   timeframe: 'daily' | 'weekly' | 'monthly' = 'daily';
   showWatchlist = false;
   fullName = '';
