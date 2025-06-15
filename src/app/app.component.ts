@@ -50,6 +50,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   // SMA and D-Mark settings
   showDMark = false;
   showVolumeOverlap = false;
+  showSma = false;
   showSma1 = true;
   showSma2 = false;
   showSma3 = false;
@@ -119,6 +120,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         timeframe: this.timeframe,
         showDMark: this.showDMark,
         showVolumeOverlap: this.showVolumeOverlap,
+        showSma: this.showSma,
       })
       .subscribe({
         next: () => (this.saveStatus = 'success'),
@@ -134,6 +136,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.showDMark = layout.showDMark ?? this.showDMark;
           this.showVolumeOverlap =
             layout.showVolumeOverlap ?? this.showVolumeOverlap;
+          this.showSma = layout.showSma ?? this.showSma;
         }
       },
       error: (err) => {
@@ -292,6 +295,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.saveLayout();
   }
 
+  onShowSmaChange(val: boolean) {
+    this.showSma = val;
+    this.saveLayout();
+  }
   resizeChart() {
     setTimeout(() => {
       if (this.chartComponent && this.chartComponent.resizeChart) {

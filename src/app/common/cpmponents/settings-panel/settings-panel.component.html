@@ -24,6 +24,16 @@
     <label>
       <input
         type="checkbox"
+        [(ngModel)]="showSma"
+        (change)="showSmaChange.emit(showSma)"
+      />
+      Show SMA
+    </label>
+  </div>
+  <div>
+    <label>
+      <input
+        type="checkbox"
         [(ngModel)]="showSma1"
         (change)="showSma1Change.emit(showSma1)"
       />
