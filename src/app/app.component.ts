@@ -224,7 +224,7 @@ export class AppComponent implements OnInit {
     } else {
       this.latestChangePct = 0;
     }
-    this.latestBarColor = bar.color || '#1aff1a'; // fallback if color not provided
+    this.latestBarColor = this.getBarColor(bar.open, bar.close);
   }
 
   onWatchlistSelect(symbol: string) {
@@ -282,5 +282,11 @@ export class AppComponent implements OnInit {
         this.chartComponent.resizeChart();
       }
     }, 0);
+  }
+
+  getBarColor(open: number, close: number): string {
+    if (close > open) return '#00ff00';
+    if (close < open) return '#ff0000';
+    return '#cccccc';
   }
 }
