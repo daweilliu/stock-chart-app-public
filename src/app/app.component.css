@@ -9,6 +9,11 @@
 /* Header stays at the top */
 app-header {
   flex: 0 0 auto;
+  background: #181922;
+  border-bottom: 5px solid #22232a; /* Same as grid color */
+  display: flex;
+  align-items: center; /* Vertically center content */
+  height: 48px; /* Or your preferred header height */
 }
 
 /* Main content (split area) fills the rest */
@@ -18,6 +23,8 @@ app-header {
   min-width: 0;
   overflow: hidden;
   height: 100%;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
 }
 
 /* Split and split areas fill available space */
@@ -56,7 +63,7 @@ as-split-area {
   overflow-y: auto;
   overflow-x: hidden !important;
   box-sizing: border-box;
-  background: #000 !important; /* Make panel black */
+  background: #000 !important;
   color: #fff;
   padding: 0;
   margin: 0;
@@ -67,6 +74,7 @@ as-split-area {
   padding-bottom: 0 !important;
   margin-bottom: 0 !important;
   height: 100% !important;
+  background: #181922 !important; /* or #181818 for a near-black look */
 }
 
 /* Force all canvases to fill their parent */
@@ -77,6 +85,7 @@ canvas {
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box;
+  background: #181922 !important;
 }
 
 /* Horizontal gutter (between left/right panels) */

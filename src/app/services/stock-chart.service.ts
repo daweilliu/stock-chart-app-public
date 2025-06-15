@@ -18,18 +18,21 @@ export class StockChartService {
       height: container.offsetHeight,
       rightPriceScale: { visible: false },
       timeScale: { borderColor: '#71649C', visible: true, rightOffset: 2 }, // Right margin (in bars)
-      layout: { background: { color: '#0F0F0F' }, textColor: '#fff' },
-      grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } },
+      layout: { background: { color: '#181922' }, textColor: '#cccccc' },
+      grid: {
+        vertLines: { color: '#22232a' },
+        horzLines: { color: ' }#22232a' },
+      },
       leftPriceScale: { visible: true, borderColor: '#555' },
     });
     this.candleSeries = this.chart.addCandlestickSeries({
       priceScaleId: 'left',
-      upColor: '#089981', // <-- up bar color (green)
-      downColor: '#F23645', // <-- down bar color (red)
-      borderUpColor: '#089981',
-      borderDownColor: '#F23645',
-      wickUpColor: '#089981',
-      wickDownColor: '#F23645',
+      upColor: '#00ff00',
+      downColor: '#ff0000',
+      borderUpColor: '#00ff00',
+      borderDownColor: '#ff0000',
+      wickUpColor: '#00ff00',
+      wickDownColor: '#ff0000',
     });
     this.volumeSeries = this.chart.addHistogramSeries({
       color: '#888',

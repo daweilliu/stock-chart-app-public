@@ -125,7 +125,6 @@ export class AppComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load layout:', err);
-        // Optionally, set a status or show a message to the user
         this.saveStatus = 'error';
       },
     });
@@ -232,11 +231,7 @@ export class AppComponent implements OnInit {
     this.symbol = symbol;
     if (this.chartComponent) {
       this.chartComponent.onWatchlistSelect(symbol);
-      setTimeout(() => {
-        if (this.chartComponent && this.chartComponent.resizeChart) {
-          this.chartComponent.resizeChart();
-        }
-      }, 0);
+      this.resizeChart();
       this.fetchFullName(symbol);
     }
   }
@@ -245,11 +240,7 @@ export class AppComponent implements OnInit {
     this.showPanel = false; // Optionally close the panel after applying
     if (this.chartComponent) {
       this.chartComponent.reload();
-      setTimeout(() => {
-        if (this.chartComponent && this.chartComponent.resizeChart) {
-          this.chartComponent.resizeChart();
-        }
-      }, 0);
+      this.resizeChart();
     }
   }
 
@@ -261,20 +252,12 @@ export class AppComponent implements OnInit {
 
   toggleSettingsPanel() {
     this.showPanel = !this.showPanel;
-    setTimeout(() => {
-      if (this.chartComponent && this.chartComponent.resizeChart) {
-        this.chartComponent.resizeChart();
-      }
-    }, 0);
+    this.resizeChart();
   }
 
   toggleWatchlistPanel() {
     this.showWatchlist = !this.showWatchlist;
-    setTimeout(() => {
-      if (this.chartComponent && this.chartComponent.resizeChart) {
-        this.chartComponent.resizeChart();
-      }
-    }, 0);
+    this.resizeChart();
   }
 
   // Call saveLayout() whenever you want to persist changes
@@ -291,5 +274,13 @@ export class AppComponent implements OnInit {
   onShowVolumeOverlapChange(val: boolean) {
     this.showVolumeOverlap = val;
     this.saveLayout();
+  }
+
+  resizeChart() {
+    setTimeout(() => {
+      if (this.chartComponent && this.chartComponent.resizeChart) {
+        this.chartComponent.resizeChart();
+      }
+    }, 0);
   }
 }
