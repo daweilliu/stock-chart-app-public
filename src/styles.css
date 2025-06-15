@@ -5,3 +5,8 @@ body {
   padding: 0;
   font-family: Arial, sans-serif;
 }
+
+/* src/styles.css */
+::-webkit-scrollbar {
+  display: none;
+}
