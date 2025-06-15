@@ -6,6 +6,7 @@ import { WatchlistPanelComponent } from './common/cpmponents/watchlist-panel/wat
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { StockDataService } from './services/stock-data.service';
+import { LayoutService } from './services/layout.service';
 import { HttpClient } from '@angular/common/http';
 import { AppHeaderComponent } from './common/cpmponents/app-header/app-header.component';
 
@@ -27,15 +28,10 @@ import { AppHeaderComponent } from './common/cpmponents/app-header/app-header.co
 export class AppComponent implements OnInit {
   @ViewChild(StockChartComponent) chartComponent!: StockChartComponent;
   // Symbol and range
-  symbol = 'AAPL';
+  symbol = '';
   range: '1y' | '5y' | 'max' | 'ytd' | '2y' | '10y' = '1y';
   timeframe: 'daily' | 'weekly' | 'monthly' = 'daily';
   showWatchlist = false;
-  // watchlist = [
-  //   { symbol: 'AAPL', last: 0, chg: 0, chgPct: 0, ext: 0 },
-  //   { symbol: 'MSFT', last: 0, chg: 0, chgPct: 0, ext: 0 },
-  //   { symbol: 'GOOG', last: 0, chg: 0, chgPct: 0, ext: 0 },
-  // ];
   fullName = '';
   isLoadingName = false;
   latestOpen = 0;
@@ -65,11 +61,18 @@ export class AppComponent implements OnInit {
   // Removed duplicate and incorrect declaration of watchlist
   watchlist: any[] = [];
   userId = 'demo-user'; // Replace with real user id if you have auth
-
-  constructor(private stockData: StockDataService, private http: HttpClient) {}
+  layoutName = 'default';
+  saveStatus: 'idle' | 'saving' | 'success' | 'error' = 'idle';
+  constructor(
+    private stockData: StockDataService,
+    private layoutService: LayoutService,
+    private http: HttpClient
+  ) {}
 
   ngOnInit() {
+    this.loadLayout();
     this.fetchFullName(this.symbol);
+    this.onSettingsApply();
     this.loadWatchlist();
   }
 
@@ -95,6 +98,37 @@ export class AppComponent implements OnInit {
           ext: 0,
         }));
       });
+  }
+
+  saveLayout() {
+    this.layoutService
+      .saveLayout(this.userId, this.layoutName, {
+        timeframe: this.timeframe,
+        showDMark: this.showDMark,
+        showVolumeOverlap: this.showVolumeOverlap,
+      })
+      .subscribe({
+        next: () => (this.saveStatus = 'success'),
+        error: () => (this.saveStatus = 'error'),
+      });
+  }
+
+  loadLayout() {
+    this.layoutService.loadLayout(this.userId, this.layoutName).subscribe({
+      next: (layout) => {
+        if (layout) {
+          this.timeframe = layout.timeframe ?? this.timeframe;
+          this.showDMark = layout.showDMark ?? this.showDMark;
+          this.showVolumeOverlap =
+            layout.showVolumeOverlap ?? this.showVolumeOverlap;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load layout:', err);
+        // Optionally, set a status or show a message to the user
+        this.saveStatus = 'error';
+      },
+    });
   }
 
   addToWatchlist(symbol: string) {
@@ -241,5 +275,21 @@ export class AppComponent implements OnInit {
         this.chartComponent.resizeChart();
       }
     }, 0);
+  }
+
+  // Call saveLayout() whenever you want to persist changes
+  onTimeframeChange(tf: string) {
+    if (['daily', 'weekly', 'monthly'].includes(tf)) {
+      this.timeframe = tf as 'daily' | 'weekly' | 'monthly';
+      this.saveLayout();
+    }
+  }
+  onShowDMarkChange(val: boolean) {
+    this.showDMark = val;
+    this.saveLayout();
+  }
+  onShowVolumeOverlapChange(val: boolean) {
+    this.showVolumeOverlap = val;
+    this.saveLayout();
   }
 }
