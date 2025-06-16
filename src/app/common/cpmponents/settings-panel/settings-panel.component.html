@@ -1,7 +1,7 @@
 <div class="settings-panel">
   <h4 class="title">Chart Settings</h4>
-  <div>
-    <label>
+  <div class="settings-row">
+    <label class="settings-label">
       <input
         type="checkbox"
         [(ngModel)]="showDMark"
@@ -10,8 +10,8 @@
       Show D-Mark
     </label>
   </div>
-  <div>
-    <label>
+  <div class="settings-row">
+    <label class="settings-label">
       <input
         type="checkbox"
         [(ngModel)]="showVolumeOverlap"
@@ -20,7 +20,7 @@
       Volume Overlap
     </label>
   </div>
-  <div>
+  <div class="settings-row">
     <label>
       <input
         type="checkbox"
@@ -29,6 +29,15 @@
       />
       Show SMA
     </label>
+    <button
+      mat-icon-button
+      type="button"
+      class="edit-btn"
+      (click)="showSmaSetting = true"
+      title="Edit"
+    >
+      <mat-icon>edit</mat-icon>
+    </button>
   </div>
   <div>
     <label>
@@ -122,3 +131,11 @@
   </div>
   <button (click)="applySettings()">Apply</button>
 </div>
+
+<app-sma-setting
+  *ngIf="showSmaSetting"
+  [smas]="smas"
+  (close)="showSmaSetting = false"
+  (apply)="onSmaApply($event)"
+>
+</app-sma-setting>

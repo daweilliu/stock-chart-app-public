@@ -1,0 +1,11 @@
+<div class="sma-setting-panel">
+  <div *ngFor="let sma of smas; let i = index" class="sma-row">
+    <label>
+      <input type="checkbox" [(ngModel)]="sma.enabled" />
+      SMA{{ i + 1 }}
+    </label>
+    <input type="number" [(ngModel)]="sma.value" [disabled]="!sma.enabled" />
+  </div>
+  <button (click)="onClose()">Close</button>
+  <button (click)="onApply()">Apply</button>
+</div>
