@@ -1,14 +1,14 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { AngularSplitModule } from 'angular-split';
 import { StockChartComponent } from './stock-chart/stock-chart.component';
-import { SettingsPanelComponent } from './common/cpmponents/settings-panel/settings-panel.component';
-import { WatchlistPanelComponent } from './common/cpmponents/watchlist-panel/watchlist-panel.component';
+import { SettingsPanelComponent } from './common/components/settings-panel/settings-panel.component';
+import { WatchlistPanelComponent } from './common/components/watchlist-panel/watchlist-panel.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { StockDataService } from './services/stock-data.service';
 import { LayoutService } from './services/layout.service';
 import { HttpClient } from '@angular/common/http';
-import { AppHeaderComponent } from './common/cpmponents/app-header/app-header.component';
+import { AppHeaderComponent } from './common/components/app-header/app-header.component';
 import { SplitComponent, SplitGutterInteractionEvent } from 'angular-split';
 import { Subscription } from 'rxjs';
 
