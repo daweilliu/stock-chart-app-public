@@ -37,6 +37,7 @@ export function loadSymbolDataExternal(
   symbol: string,
   range: string,
   timeframe: 'daily' | 'weekly' | 'monthly',
+  showSma: boolean,
   showSma1: boolean,
   sma1Period: number,
   showSma2: boolean,
@@ -116,11 +117,13 @@ export function loadSymbolDataExternal(
 
       if (showVolumeOverlap) chartService.setVolumeData(volumeData);
 
-      if (showSma1) chartService.addSmaLine(data, sma1Period, 'lightblue');
-      if (showSma2) chartService.addSmaLine(data, sma2Period, 'orange');
-      if (showSma3) chartService.addSmaLine(data, sma3Period, 'green');
-      if (showSma4) chartService.addSmaLine(data, sma4Period, 'red');
-      if (showSma5) chartService.addSmaLine(data, sma5Period, 'purple');
+      if (showSma) {
+        if (showSma1) chartService.addSmaLine(data, sma1Period, 'lightblue');
+        if (showSma2) chartService.addSmaLine(data, sma2Period, 'orange');
+        if (showSma3) chartService.addSmaLine(data, sma3Period, 'green');
+        if (showSma4) chartService.addSmaLine(data, sma4Period, 'red');
+        if (showSma5) chartService.addSmaLine(data, sma5Period, 'purple');
+      }
 
       // D-Mark markers
       const markers = buildDMarkMarkers(data);

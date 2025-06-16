@@ -34,6 +34,8 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
   @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
 
   // SMA Inputs
+
+  @Input() showSma: boolean = false;
   @Input() sma1Period: number = 5;
   @Input() showSma1: boolean = true;
   @Input() sma2Period: number = 21;
@@ -89,6 +91,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
       symbol,
       this.range,
       this.timeframe,
+      this.showSma,
       this.showSma1,
       this.sma1Period,
       this.showSma2,
