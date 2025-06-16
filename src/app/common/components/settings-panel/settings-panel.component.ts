@@ -19,6 +19,7 @@ export class SettingsPanelComponent {
   @Output() showVolumeOverlapChange = new EventEmitter<boolean>();
   @Output() showSmaChange = new EventEmitter<boolean>();
   @Output() smasChange = new EventEmitter<any[]>();
+  @Output() apply = new EventEmitter<void>();
   @Input() smas: any[] = [
     { enabled: true, value: 5 },
     { enabled: false, value: 21 },
@@ -38,7 +39,7 @@ export class SettingsPanelComponent {
   // ];
 
   applySettings() {
-    // Emit or handle apply logic as needed
+    this.apply.emit();
   }
 
   onSmaApply(newSmas: any[]) {

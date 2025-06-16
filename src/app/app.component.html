@@ -72,10 +72,9 @@
           (showSmaChange)="onShowSmaChange($event)"
           [smas]="smas"
           (smasChange)="onSmasChange($event)"
+          (apply)="onSettingsApply()"
         >
-          (apply)="onSettingsApply()" (close)="toggleSettingsPanel()"
-          ></app-settings-panel
-        >
+        </app-settings-panel>
         <app-watchlist-panel
           *ngIf="showWatchlist && !showPanel"
           [symbols]="watchlist"
