@@ -39,96 +39,6 @@
       <mat-icon>edit</mat-icon>
     </button>
   </div>
-  <div>
-    <label>
-      <input
-        type="checkbox"
-        [(ngModel)]="showSma1"
-        (change)="showSma1Change.emit(showSma1)"
-      />
-      SMA1
-    </label>
-    <input
-      type="number"
-      min="1"
-      max="500"
-      [(ngModel)]="sma1Period"
-      (change)="sma1PeriodChange.emit(sma1Period)"
-      style="width: 60px; margin-left: 8px"
-    />
-  </div>
-  <div>
-    <label>
-      <input
-        type="checkbox"
-        [(ngModel)]="showSma2"
-        (change)="showSma2Change.emit(showSma2)"
-      />
-      SMA2
-    </label>
-    <input
-      type="number"
-      min="1"
-      max="500"
-      [(ngModel)]="sma2Period"
-      (change)="sma2PeriodChange.emit(sma2Period)"
-      style="width: 60px; margin-left: 8px"
-    />
-  </div>
-  <div>
-    <label>
-      <input
-        type="checkbox"
-        [(ngModel)]="showSma3"
-        (change)="showSma3Change.emit(showSma3)"
-      />
-      SMA3
-    </label>
-    <input
-      type="number"
-      min="1"
-      max="500"
-      [(ngModel)]="sma3Period"
-      (change)="sma3PeriodChange.emit(sma3Period)"
-      style="width: 60px; margin-left: 8px"
-    />
-  </div>
-  <div>
-    <label>
-      <input
-        type="checkbox"
-        [(ngModel)]="showSma4"
-        (change)="showSma4Change.emit(showSma4)"
-      />
-      SMA4
-    </label>
-    <input
-      type="number"
-      min="1"
-      max="500"
-      [(ngModel)]="sma4Period"
-      (change)="sma4PeriodChange.emit(sma4Period)"
-      style="width: 60px; margin-left: 8px"
-    />
-  </div>
-  <div>
-    <label>
-      <input
-        type="checkbox"
-        [(ngModel)]="showSma5"
-        (change)="showSma5Change.emit(showSma5)"
-      />
-      SMA5
-    </label>
-    <input
-      type="number"
-      min="1"
-      max="500"
-      [(ngModel)]="sma5Period"
-      (change)="sma5PeriodChange.emit(sma5Period)"
-      style="width: 60px; margin-left: 8px"
-    />
-  </div>
   <button (click)="applySettings()">Apply</button>
 </div>
 
@@ -137,5 +47,4 @@
   [smas]="smas"
   (close)="showSmaSetting = false"
   (apply)="onSmaApply($event)"
->
-</app-sma-setting>
+></app-sma-setting>
