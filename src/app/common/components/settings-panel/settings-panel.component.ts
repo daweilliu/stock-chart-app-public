@@ -18,16 +18,24 @@ export class SettingsPanelComponent {
   @Output() showDMarkChange = new EventEmitter<boolean>();
   @Output() showVolumeOverlapChange = new EventEmitter<boolean>();
   @Output() showSmaChange = new EventEmitter<boolean>();
-
-  showSmaSetting = false;
-
-  smas = [
+  @Output() smasChange = new EventEmitter<any[]>();
+  @Input() smas: any[] = [
     { enabled: true, value: 5 },
     { enabled: false, value: 21 },
     { enabled: false, value: 60 },
     { enabled: false, value: 120 },
     { enabled: false, value: 240 },
   ];
+
+  showSmaSetting = false;
+
+  // smas = [
+  //   { enabled: true, value: 5 },
+  //   { enabled: false, value: 21 },
+  //   { enabled: false, value: 60 },
+  //   { enabled: false, value: 120 },
+  //   { enabled: false, value: 240 },
+  // ];
 
   applySettings() {
     // Emit or handle apply logic as needed
@@ -36,6 +44,6 @@ export class SettingsPanelComponent {
   onSmaApply(newSmas: any[]) {
     this.smas = newSmas;
     this.showSmaSetting = false;
-    // Optionally emit changes to parent
+    this.smasChange.emit(this.smas); // Emit to parent
   }
 }

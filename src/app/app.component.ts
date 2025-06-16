@@ -9,7 +9,7 @@ import { StockDataService } from './services/stock-data.service';
 import { LayoutService } from './services/layout.service';
 import { HttpClient } from '@angular/common/http';
 import { AppHeaderComponent } from './common/components/app-header/app-header.component';
-import { SplitComponent, SplitGutterInteractionEvent } from 'angular-split';
+import { SplitComponent } from 'angular-split';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -44,6 +44,14 @@ export class AppComponent implements OnInit, AfterViewInit {
   latestClose = 0;
   latestChangePct = 0;
 
+  smas = [
+    { enabled: true, value: 5 },
+    { enabled: false, value: 21 },
+    { enabled: false, value: 60 },
+    { enabled: false, value: 120 },
+    { enabled: false, value: 240 },
+  ];
+
   // Settings panel state
   showPanel = false;
 
@@ -51,24 +59,14 @@ export class AppComponent implements OnInit, AfterViewInit {
   showDMark = false;
   showVolumeOverlap = false;
   showSma = false;
-  showSma1 = true;
-  showSma2 = false;
-  showSma3 = false;
-  showSma4 = false;
-  showSma5 = false;
-  sma1Period = 5;
-  sma2Period = 21;
-  sma3Period = 60;
-  sma4Period = 120;
-  sma5Period = 240;
   latestBarColor: string = '#1aff1a';
 
-  // Removed duplicate and incorrect declaration of watchlist
   watchlist: any[] = [];
   userId = 'demo-user'; // Replace with real user id if you have auth
   layoutName = 'default';
   saveStatus: 'idle' | 'saving' | 'success' | 'error' = 'idle';
   private sub?: Subscription;
+
   constructor(
     private stockData: StockDataService,
     private layoutService: LayoutService,
@@ -84,8 +82,6 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.sub = this.mySplit.dragProgress$.subscribe((event) => {
-      // If you want to trigger change detection, wrap in ngZone
-      console.log('Splitter drag progress:', event);
       this.resizeChart();
     });
   }
@@ -175,10 +171,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onRangeChange() {
-    //this.fetchFullName(this.symbol);
-  }
-
   fetchFullName(symbol: string) {
     this.isLoadingName = true;
     this.stockData.searchSymbol(symbol).subscribe(
@@ -253,7 +245,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   onSettingsApply() {
-    this.showPanel = false; // Optionally close the panel after applying
+    this.showPanel = false;
     if (this.chartComponent) {
       this.chartComponent.reload();
       this.resizeChart();
@@ -265,6 +257,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.chartComponent.resizeChart();
     }
   }
+
   onDragProgress(event: Event): void {
     console.log('✅ Dragging in progress!', event);
   }
@@ -279,17 +272,18 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.resizeChart();
   }
 
-  // Call saveLayout() whenever you want to persist changes
   onTimeframeChange(tf: string) {
     if (['daily', 'weekly', 'monthly'].includes(tf)) {
       this.timeframe = tf as 'daily' | 'weekly' | 'monthly';
       this.saveLayout();
     }
   }
+
   onShowDMarkChange(val: boolean) {
     this.showDMark = val;
     this.saveLayout();
   }
+
   onShowVolumeOverlapChange(val: boolean) {
     this.showVolumeOverlap = val;
     this.saveLayout();
@@ -299,6 +293,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.showSma = val;
     this.saveLayout();
   }
+
   resizeChart() {
     setTimeout(() => {
       if (this.chartComponent && this.chartComponent.resizeChart) {
@@ -311,5 +306,13 @@ export class AppComponent implements OnInit, AfterViewInit {
     if (close > open) return '#00ff00';
     if (close < open) return '#ff0000';
     return '#cccccc';
+  }
+
+  // --- Update chart immediately when SMA settings change ---
+  onSmasChange(newSmas: any[]) {
+    this.smas = newSmas;
+    if (this.chartComponent && this.chartComponent.updateSmas) {
+      this.chartComponent.updateSmas(this.smas);
+    }
   }
 }

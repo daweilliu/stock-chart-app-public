@@ -18,7 +18,6 @@
   (showPanelChange)="toggleSettingsPanel()"
   (showWatchlistChange)="toggleWatchlistPanel()"
   (loadSymbol)="loadSymbol($event)"
-  (onRangeChange)="onRangeChange()"
 ></app-header>
 
 <div class="main-content">
@@ -39,16 +38,16 @@
             [timeframe]="timeframe"
             [showDMark]="showDMark"
             [showVolumeOverlap]="showVolumeOverlap"
-            [showSma1]="showSma1"
-            [sma1Period]="sma1Period"
-            [showSma2]="showSma2"
-            [sma2Period]="sma2Period"
-            [showSma3]="showSma3"
-            [sma3Period]="sma3Period"
-            [showSma4]="showSma4"
-            [sma4Period]="sma4Period"
-            [showSma5]="showSma5"
-            [sma5Period]="sma5Period"
+            [showSma1]="smas[0]?.enabled ?? false"
+            [sma1Period]="smas[0]?.value ?? 5"
+            [showSma2]="smas[1]?.enabled ?? false"
+            [sma2Period]="smas[1]?.value ?? 21"
+            [showSma3]="smas[2]?.enabled ?? false"
+            [sma3Period]="smas[2]?.value ?? 60"
+            [showSma4]="smas[3]?.enabled ?? false"
+            [sma4Period]="smas[3]?.value ?? 120"
+            [showSma5]="smas[4]?.enabled ?? false"
+            [sma5Period]="smas[4]?.value ?? 240"
             (latestBar)="onLatestBar($event)"
             (barClicked)="onLatestBar($event)"
           ></app-stock-chart>
@@ -70,6 +69,8 @@
           (showVolumeOverlapChange)="onShowVolumeOverlapChange($event)"
           [showSma]="showSma"
           (showSmaChange)="onShowSmaChange($event)"
+          [smas]="smas"
+          (smasChange)="onSmasChange($event)"
         >
           (apply)="onSettingsApply()" (close)="toggleSettingsPanel()"
           ></app-settings-panel
