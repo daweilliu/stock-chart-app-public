@@ -55,7 +55,12 @@ export class StockChartService {
 
   addSmaLine(data: CandlestickData[], period: number, color: string) {
     const smaData = this.calculateSMA(data, period);
-    const smaSeries = this.chart.addLineSeries({ color, lineWidth: 2 });
+
+    const smaSeries = this.chart.addLineSeries({
+      color,
+      lineWidth: 2,
+      priceLineVisible: false,
+    });
     smaSeries.setData(smaData);
     return smaSeries;
   }
