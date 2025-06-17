@@ -11,6 +11,7 @@ import { HttpClient } from '@angular/common/http';
 import { AppHeaderComponent } from './common/components/app-header/app-header.component';
 import { SplitComponent } from 'angular-split';
 import { Subscription } from 'rxjs';
+import { SettingsService } from './services/settings.service';
 
 @Component({
   standalone: true,
@@ -70,11 +71,13 @@ export class AppComponent implements OnInit, AfterViewInit {
   constructor(
     private stockData: StockDataService,
     private layoutService: LayoutService,
+    private settingsService: SettingsService,
     private http: HttpClient
   ) {}
 
   ngOnInit() {
     this.loadLayout();
+    this.loadSettings();
     this.fetchFullName(this.symbol);
     this.onSettingsApply();
     this.loadWatchlist();
@@ -140,6 +143,27 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.saveStatus = 'error';
       },
     });
+  }
+
+  saveSettings() {
+    this.settingsService
+      .saveSettings(this.userId, this.layoutName, {
+        'sma-setting': this.smas,
+      })
+      .subscribe({
+        next: () => (this.saveStatus = 'success'),
+        error: () => (this.saveStatus = 'error'),
+      });
+  }
+
+  loadSettings() {
+    this.settingsService
+      .loadSettings(this.userId, this.layoutName)
+      .subscribe((setting_detail) => {
+        if (setting_detail['sma-setting']) {
+          this.smas = setting_detail['sma-setting'];
+        }
+      });
   }
 
   addToWatchlist(symbol: string) {
@@ -311,6 +335,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   // --- Update chart immediately when SMA settings change ---
   onSmasChange(newSmas: any[]) {
     this.smas = newSmas;
+    this.saveSettings();
     if (this.chartComponent && this.chartComponent.updateSmas) {
       this.chartComponent.updateSmas(this.smas);
     }
