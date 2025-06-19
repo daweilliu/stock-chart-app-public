@@ -81,6 +81,9 @@ export class AppHeaderComponent {
 
   triggerLoadSymbol(symbol: string) {
     this.loadSymbol.emit(symbol);
+    setTimeout(() => {
+      this.symbolInput.nativeElement.select();
+    }, 0);
   }
 
   togglePanel() {

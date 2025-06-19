@@ -7,7 +7,7 @@
       (input)="onSymbolInput($event)"
       placeholder="Stock Symbol"
       style="width: 100px; margin-right: 8px"
-      (keyup.enter)="triggerLoadSymbol(symbol)"
+      (keyup.enter)="triggerLoadSymbol(symbolInput.value)"
     />
 
     <select
