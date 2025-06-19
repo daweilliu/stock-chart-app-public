@@ -1,4 +1,12 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ElementRef,
+  ViewChild,
+  HostListener,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -10,6 +18,7 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./app-header.component.css'],
 })
 export class AppHeaderComponent {
+  @ViewChild('symbolInput') symbolInput!: ElementRef<HTMLInputElement>;
   @Input() symbol!: string;
   @Input() range!: string;
   @Input() timeframe!: string;
@@ -35,6 +44,27 @@ export class AppHeaderComponent {
   @Output() timeframeChange = new EventEmitter<
     'daily' | 'weekly' | 'monthly'
   >();
+
+  @HostListener('document:keydown', ['$event'])
+  handleGlobalKeydown(event: KeyboardEvent) {
+    const active = document.activeElement;
+    // If not focused on an input, textarea, or contenteditable
+    if (
+      active &&
+      !(active instanceof HTMLInputElement) &&
+      !(active instanceof HTMLTextAreaElement) &&
+      !(active as HTMLElement).isContentEditable
+    ) {
+      if (/^[a-zA-Z0-9]$/.test(event.key)) {
+        const inputEl = this.symbolInput.nativeElement;
+        if (inputEl.value.length > 0) {
+          inputEl.value = '';
+          this.symbolChange.emit('');
+        }
+        inputEl.focus();
+      }
+    }
+  }
 
   onSymbolInput(event: any) {
     this.symbolChange.emit(event.target.value);
