@@ -1,5 +1,8 @@
 import { EventEmitter } from '@angular/core';
-import { buildDMarkMarkers } from '../common/marker-helpers';
+import {
+  buildDMarkMarkers,
+  buildFlipFlopMarkers,
+} from '../common/marker-helpers';
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
 
@@ -129,6 +132,12 @@ export function loadSymbolDataExternal(
       const markers = buildDMarkMarkers(data);
       if (chartService.candleSeries) {
         chartService.candleSeries.setMarkers(showDMark ? markers : []);
+      }
+
+      const swingBars = 1;
+      const flipFlopMarkers = buildFlipFlopMarkers(data, swingBars);
+      if (chartService.candleSeries) {
+        chartService.candleSeries.setMarkers(flipFlopMarkers);
       }
     });
 }
