@@ -46,106 +46,41 @@ export function buildDMarkMarkers(data: CandlestickData[]): any[] {
   return markers;
 }
 
-// Place this below buildDMarkMarkers in marker-helpers.ts
-
-export function buildFlipFlopMarkers(
+export function buildDLSeqMarkers(
   data: CandlestickData[],
-  swingBars = 1
+  startIndex: number,
+  startMode: 'up' | 'down' = 'up'
 ): any[] {
   const markers: any[] = [];
-  let mode: 'up' | 'down' = 'up';
-  let count = 0;
+  let mode: 'up' | 'down' = startMode;
+  let count = 1;
 
-  function isSwingLow(idx: number): boolean {
-    const curr = data[idx].low;
-    for (let i = 1; i <= swingBars; i++) {
-      if (
-        idx - i < 0 ||
-        idx + i >= data.length ||
-        data[idx - i].low <= curr ||
-        data[idx + i].low <= curr
-      ) {
-        return false;
-      }
-    }
-    return true;
-  }
+  for (let i = startIndex; i < data.length; i++) {
+    markers.push({
+      time: data[i].time,
+      position: mode === 'up' ? 'aboveBar' : 'belowBar',
+      color: mode === 'up' ? 'yellow' : 'cyan',
+      text: String(count),
+      size: count === 9 ? 2 : 1,
+      fontWeight: count === 9 ? 'bold' : undefined,
+    });
 
-  function isSwingHigh(idx: number): boolean {
-    const curr = data[idx].high;
-    for (let i = 1; i <= swingBars; i++) {
-      if (
-        idx - i < 0 ||
-        idx + i >= data.length ||
-        data[idx - i].high >= curr ||
-        data[idx + i].high >= curr
-      ) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  for (let i = swingBars; i < data.length - swingBars; i++) {
-    if (mode === 'up') {
-      if (count === 0 && isSwingLow(i)) {
-        count = 1;
-        markers.push({
-          time: data[i].time,
-          position: 'aboveBar',
-          color: 'yellow',
-          text: '1',
-          size: 1,
-        });
-      } else if (count > 0 && count < 9) {
-        count++;
-        markers.push({
-          time: data[i].time,
-          position: 'aboveBar',
-          color: 'yellow',
-          text: String(count),
-          size: count === 9 ? 2 : 1,
-          fontWeight: count === 9 ? 'bold' : undefined,
-        });
-        if (count === 9) {
-          // At 9, overlay a new 1 below and switch
-          markers.push({
-            time: data[i].time,
-            position: 'belowBar',
-            color: 'cyan',
-            text: '1',
-            size: 1,
-          });
-          mode = 'down';
-          count = 1; // start count for down sequence
-        }
-      }
-    } else if (mode === 'down') {
-      if (count > 0 && count < 9) {
-        count++;
-        markers.push({
-          time: data[i].time,
-          position: 'belowBar',
-          color: 'cyan',
-          text: String(count),
-          size: count === 9 ? 2 : 1,
-          fontWeight: count === 9 ? 'bold' : undefined,
-        });
-        if (count === 9) {
-          // At 9, overlay a new 1 above and switch
-          markers.push({
-            time: data[i].time,
-            position: 'aboveBar',
-            color: 'yellow',
-            text: '1',
-            size: 1,
-          });
-          mode = 'up';
-          count = 1;
-        }
-      }
+    if (count === 9) {
+      // Add 9 marker (already added above), now immediately add "1" marker on the same bar (overlap)
+      // Flip mode for next marker
+      const nextMode = mode === 'up' ? 'down' : 'up';
+      markers.push({
+        time: data[i].time,
+        position: nextMode === 'up' ? 'aboveBar' : 'belowBar',
+        color: nextMode === 'up' ? 'yellow' : 'cyan',
+        text: '1',
+        size: 1,
+      });
+      mode = nextMode;
+      count = 2; // because "1" is already displayed at this bar
+    } else {
+      count++;
     }
   }
-
   return markers;
 }

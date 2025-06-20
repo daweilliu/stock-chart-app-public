@@ -51,6 +51,9 @@
             [sma5Period]="smas[4]?.value ?? 240"
             (latestBar)="onLatestBar($event)"
             (barClicked)="onLatestBar($event)"
+            (dlSeq9Click)="onDlSeq9Click($event)"
+            (saveDLSeq9)="saveDLSeq9()"
+            (deleteDLSeq9)="onDeleteDLSeq9()"
           ></app-stock-chart>
         </div>
       </div>

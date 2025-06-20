@@ -12,6 +12,7 @@ import { AppHeaderComponent } from './common/components/app-header/app-header.co
 import { SplitComponent } from 'angular-split';
 import { Subscription } from 'rxjs';
 import { SettingsService } from './services/settings.service';
+import { InstrumentSettingService } from './services/instrument-setting.service';
 
 @Component({
   standalone: true,
@@ -66,12 +67,14 @@ export class AppComponent implements OnInit, AfterViewInit {
   userId = 'demo-user'; // Replace with real user id if you have auth
   layoutName = 'default';
   saveStatus: 'idle' | 'saving' | 'success' | 'error' = 'idle';
+  startTime: string = '00:00:00'; // Default start time for DLSeq9
   private sub?: Subscription;
 
   constructor(
     private stockData: StockDataService,
     private layoutService: LayoutService,
     private settingsService: SettingsService,
+    private instrumentSettingService: InstrumentSettingService,
     private http: HttpClient
   ) {}
 
@@ -166,6 +169,38 @@ export class AppComponent implements OnInit, AfterViewInit {
       });
   }
 
+  saveDLSeq9() {
+    this.instrumentSettingService
+      .saveSetting({
+        userId: this.userId,
+        layout: this.layoutName,
+        symbol: this.symbol,
+        settingType: 'dlSeq9',
+        value: { startTime: this.startTime },
+      })
+      .subscribe((res) => {
+        // handle success, maybe notify StockChartComponent
+      });
+  }
+
+  loadDLSeq9() {
+    this.instrumentSettingService
+      .getSetting(this.userId, this.layoutName, this.symbol, 'dlSeq9')
+      .subscribe((value) => {
+        this.startTime = value.startTime || '00:00:00'; // Default to 00:00:00 if not set
+        // value is { startTime: ... } or {} if not set
+        // pass to StockChartComponent if needed
+      });
+  }
+
+  deleteDLSeq9() {
+    this.instrumentSettingService
+      .deleteSetting(this.userId, this.layoutName, this.symbol, 'dlSeq9')
+      .subscribe((res) => {
+        // handle success, maybe notify StockChartComponent
+      });
+  }
+
   addToWatchlist(symbol: string) {
     this.watchlist.push({
       symbol,
@@ -192,6 +227,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.chartComponent.resizeChart();
         }
       }, 0);
+      this.loadDLSeq9();
     }
   }
 
@@ -339,5 +375,19 @@ export class AppComponent implements OnInit, AfterViewInit {
     if (this.chartComponent && this.chartComponent.updateSmas) {
       this.chartComponent.updateSmas(this.smas);
     }
+  }
+
+  onDlSeq9Click(event: { time: string | number; isShowing: boolean }) {
+    this.startTime = event.time as string;
+    // Handle the event
+    console.log('AppComponent DLSeq9 Click:', event);
+  }
+
+  onDeleteDLSeq9() {
+    this.instrumentSettingService
+      .deleteSetting(this.userId, this.layoutName, this.symbol, 'dlSeq9')
+      .subscribe((res) => {
+        // handle success, maybe notify StockChartComponent
+      });
   }
 }

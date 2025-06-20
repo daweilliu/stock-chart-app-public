@@ -1,10 +1,12 @@
 import { EventEmitter } from '@angular/core';
-import {
-  buildDMarkMarkers,
-  buildFlipFlopMarkers,
-} from '../common/marker-helpers';
+import { buildDMarkMarkers, buildDLSeqMarkers } from '../common/marker-helpers';
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
+
+export const dlSeq9Click$ = new EventEmitter<{
+  time: string | number;
+  isShowing: boolean;
+}>();
 
 export function getOutputSize(range: string): string {
   switch (range) {
@@ -56,7 +58,8 @@ export function loadSymbolDataExternal(
   chartService: StockChartService,
   dataService: StockDataService,
   latestBar: EventEmitter<any>,
-  barClicked: EventEmitter<any>
+  barClicked: EventEmitter<any>,
+  dlSeq9Click?: EventEmitter<{ time: string | number; isShowing: boolean }>
 ) {
   const outputsize = getOutputSize(range);
   const interval = getInterval(timeframe);
@@ -96,6 +99,39 @@ export function loadSymbolDataExternal(
 
       chartService.setCandleData(data);
 
+      chartService.chart.subscribeClick((param: any) => {
+        if (!param || !param.time) return;
+
+        const clickedTime = param.time;
+        let isDLSeq9Showing = false;
+        const clickedIndex = data.findIndex((d: any) => d.time === clickedTime);
+        if (clickedIndex === -1) return;
+
+        // Check if user picked a swing low or swing high
+        if (isSwingLow(data, clickedIndex, swingBars)) {
+          // Start up count from here
+          const markers = buildDLSeqMarkers(data, clickedIndex, 'up');
+          if (chartService.candleSeries) {
+            chartService.candleSeries.setMarkers(markers);
+            isDLSeq9Showing = markers.length > 0;
+          }
+        } else if (isSwingHigh(data, clickedIndex, swingBars)) {
+          // Start down count from here
+          const markers = buildDLSeqMarkers(data, clickedIndex, 'down');
+          if (chartService.candleSeries) {
+            chartService.candleSeries.setMarkers(markers);
+            isDLSeq9Showing = markers.length > 0;
+          }
+        } else {
+          // Not a swing low or swing high: do nothing or clear markers
+          // flipFlopSeries.setMarkers([]);
+        }
+        // Emit to parent if EventEmitter provided
+        if (dlSeq9Click && isDLSeq9Showing) {
+          dlSeq9Click.emit({ time: clickedTime, isShowing: isDLSeq9Showing });
+        }
+      });
+
       if (chartService.candleSeries && chartService.chart) {
         chartService.chart.subscribeCrosshairMove((param: any) => {
           if (param && param.seriesData && param.seriesData.size > 0) {
@@ -134,10 +170,40 @@ export function loadSymbolDataExternal(
         chartService.candleSeries.setMarkers(showDMark ? markers : []);
       }
 
-      const swingBars = 1;
-      const flipFlopMarkers = buildFlipFlopMarkers(data, swingBars);
-      if (chartService.candleSeries) {
-        chartService.candleSeries.setMarkers(flipFlopMarkers);
-      }
+      const swingBars = 3;
+      // const flipFlopMarkers = buildFlipFlopMarkers(data, swingBars);
+      // if (chartService.candleSeries) {
+      //   chartService.candleSeries.setMarkers(flipFlopMarkers);
+      // }
     });
+}
+
+function isSwingLow(data: any[], idx: number, swingBars: number): boolean {
+  const curr = data[idx].low;
+  for (let i = 1; i <= swingBars; i++) {
+    if (
+      idx - i < 0 ||
+      idx + i >= data.length ||
+      data[idx - i].low <= curr ||
+      data[idx + i].low <= curr
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isSwingHigh(data: any[], idx: number, swingBars: number): boolean {
+  const curr = data[idx].high;
+  for (let i = 1; i <= swingBars; i++) {
+    if (
+      idx - i < 0 ||
+      idx + i >= data.length ||
+      data[idx - i].high >= curr ||
+      data[idx + i].high >= curr
+    ) {
+      return false;
+    }
+  }
+  return true;
 }

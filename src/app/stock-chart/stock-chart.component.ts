@@ -8,6 +8,8 @@ import {
   SimpleChanges,
   Output,
   EventEmitter,
+  OnInit,
+  HostListener,
 } from '@angular/core';
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
@@ -17,24 +19,28 @@ import {
   getOutputSize,
   getInterval,
 } from '../common/chart-helpers';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
   selector: 'app-stock-chart',
   templateUrl: './stock-chart.component.html',
   styleUrls: ['./stock-chart.component.css'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatMenuModule],
 })
-export class StockChartComponent implements AfterViewInit, OnChanges {
+export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
   @Input() symbol: string = 'AAPL';
   @Input() range: 'ytd' | '1y' | '2y' | '5y' | '10y' | 'max' = '10y';
   @Input() timeframe: 'daily' | 'weekly' | 'monthly' = 'daily';
   @Input() showDMark: boolean = true;
   @Input() showVolumeOverlap: boolean = true;
   @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
-
+  @ViewChild('chartMenu') chartMenuRef!: ElementRef;
+  @ViewChild('menuTrigger', { static: false })
+  menuTrigger!: ElementRef<HTMLButtonElement>;
+  @ViewChild(MatMenuTrigger, { static: false }) matMenuTrigger!: MatMenuTrigger;
   // SMA Inputs
-
   @Input() showSma: boolean = false;
   @Input() sma1Period: number = 5;
   @Input() showSma1: boolean = true;
@@ -59,15 +65,28 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
     low: number;
     close: number;
   }>();
+  @Output() dlSeq9Click = new EventEmitter<{
+    time: string | number;
+    isShowing: boolean;
+  }>();
+
+  @Output() saveDLSeq9 = new EventEmitter<string | number>();
+  @Output() deleteDLSeq9 = new EventEmitter<void>();
 
   showWatchlist = false;
   watchlist: string[] = ['AAPL', 'MSFT', 'GOOG'];
   showPanel = false;
+  showChartMenu = false;
+  chartMenuPosition = { x: 0, y: 0 };
+  showDLSeq9 = false; // Control visibility of DLSeq9
+  startTime: string | number | null = null;
 
   constructor(
     private chartService: StockChartService,
     private dataService: StockDataService
-  ) {}
+  ) {
+    this.showDLSeq9 = false;
+  }
 
   ngAfterViewInit(): void {
     this.chartService.initChart(this.chartContainer.nativeElement);
@@ -84,6 +103,15 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
       this.loadSymbolData();
       this.resizeChart();
     }
+  }
+
+  ngOnInit() {
+    this.dlSeq9Click.subscribe(({ time, isShowing }) => {
+      // Use time and isShowing here
+      this.showDLSeq9 = isShowing; // Update local state if needed
+      this.startTime;
+      console.log('DLSeq9:', time, isShowing);
+    });
   }
 
   loadSymbolData(symbol: string = this.symbol) {
@@ -107,7 +135,8 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
       this.chartService,
       this.dataService,
       this.latestBar,
-      this.barClicked
+      this.barClicked,
+      this.dlSeq9Click // Pass the EventEmitter for DLSeq9 click info
     );
   }
 
@@ -137,9 +166,8 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  // --- Add this method to update SMAs from settings panel ---
+  // Update SMAs from settings panel
   updateSmas(smas: any[]) {
-    // Defensive: fallback to default if not enough SMAs
     this.showSma1 = !!smas[0]?.enabled;
     this.sma1Period = smas[0]?.value ?? 5;
     this.showSma2 = !!smas[1]?.enabled;
@@ -152,5 +180,43 @@ export class StockChartComponent implements AfterViewInit, OnChanges {
     this.sma5Period = smas[4]?.value ?? 240;
 
     this.reload(); // Redraw chart with new SMA settings
+  }
+
+  onChartContextMenu(event: MouseEvent) {
+    event.preventDefault();
+    const triggerElem = this.menuTrigger.nativeElement;
+    // Move the trigger button to the mouse position
+    triggerElem.style.position = 'fixed';
+    triggerElem.style.left = `${event.clientX}px`;
+    triggerElem.style.top = `${event.clientY}px`;
+    triggerElem.style.display = 'block';
+
+    // Open the menu
+    this.matMenuTrigger.openMenu();
+
+    // Optionally, hide the button after menu opens
+    setTimeout(() => {
+      triggerElem.style.display = 'none';
+    }, 0);
+  }
+
+  onSaveDLSeq9() {
+    this.saveDLSeq9.emit(this.startTime !== null ? this.startTime : undefined);
+  }
+
+  deleteMarkers() {
+    if (this.chartService.candleSeries) {
+      this.chartService.candleSeries.setMarkers([]); // Remove all markers
+    }
+    this.showDLSeq9 = false; // Hide the popup menu if needed
+    this.startTime = null; // Reset start time
+    this.deleteDLSeq9.emit(); // Notify parent
+  }
+
+  openMenu(event: MouseEvent, trigger: MatMenuTrigger) {
+    event.preventDefault();
+    // Set menu position
+    (trigger as any)._setMenuPosition({ x: event.clientX, y: event.clientY });
+    trigger.openMenu();
   }
 }
