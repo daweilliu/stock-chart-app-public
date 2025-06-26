@@ -54,6 +54,7 @@ export function loadSymbolDataExternal(
   showSma5: boolean,
   sma5Period: number,
   showDMark: boolean,
+  showDlSeq9: boolean,
   showVolumeOverlap: boolean,
   chartService: StockChartService,
   dataService: StockDataService,
@@ -103,29 +104,13 @@ export function loadSymbolDataExternal(
         if (!param || !param.time) return;
 
         const clickedTime = param.time;
-        let isDLSeq9Showing = false;
-        const clickedIndex = data.findIndex((d: any) => d.time === clickedTime);
-        if (clickedIndex === -1) return;
-
-        // Check if user picked a swing low or swing high
-        if (isSwingLow(data, clickedIndex, swingBars)) {
-          // Start up count from here
-          const markers = buildDLSeqMarkers(data, clickedIndex, 'up');
-          if (chartService.candleSeries) {
-            chartService.candleSeries.setMarkers(markers);
-            isDLSeq9Showing = markers.length > 0;
-          }
-        } else if (isSwingHigh(data, clickedIndex, swingBars)) {
-          // Start down count from here
-          const markers = buildDLSeqMarkers(data, clickedIndex, 'down');
-          if (chartService.candleSeries) {
-            chartService.candleSeries.setMarkers(markers);
-            isDLSeq9Showing = markers.length > 0;
-          }
-        } else {
-          // Not a swing low or swing high: do nothing or clear markers
-          // flipFlopSeries.setMarkers([]);
-        }
+        let isDLSeq9Showing = progressDLSeq9(
+          data,
+          clickedTime,
+          showDlSeq9,
+          chartService,
+          swingBars
+        );
         // Emit to parent if EventEmitter provided
         if (dlSeq9Click && isDLSeq9Showing) {
           dlSeq9Click.emit({ time: clickedTime, isShowing: isDLSeq9Showing });
@@ -206,4 +191,31 @@ function isSwingHigh(data: any[], idx: number, swingBars: number): boolean {
     }
   }
   return true;
+}
+
+export function progressDLSeq9(
+  data: any[],
+  clickedTime: string | number,
+  showDlSeq9: boolean,
+  chartService: StockChartService,
+  swingBars: number
+): boolean {
+  let isDLSeq9Showing = false;
+  const clickedIndex = data.findIndex((d: any) => d.time === clickedTime);
+  if (clickedIndex === -1 || !showDlSeq9) return false;
+
+  if (isSwingLow(data, clickedIndex, swingBars)) {
+    const markers = buildDLSeqMarkers(data, clickedIndex, 'up');
+    if (chartService.candleSeries) {
+      chartService.candleSeries.setMarkers(markers);
+      isDLSeq9Showing = markers.length > 0;
+    }
+  } else if (isSwingHigh(data, clickedIndex, swingBars)) {
+    const markers = buildDLSeqMarkers(data, clickedIndex, 'down');
+    if (chartService.candleSeries) {
+      chartService.candleSeries.setMarkers(markers);
+      isDLSeq9Showing = markers.length > 0;
+    }
+  }
+  return isDLSeq9Showing;
 }

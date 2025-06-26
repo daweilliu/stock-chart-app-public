@@ -15,9 +15,13 @@ export class SettingsPanelComponent {
   @Input() showDMark = false;
   @Input() showVolumeOverlap = false;
   @Input() showSma = false;
+  @Input() showDlSeq9 = false;
+
   @Output() showDMarkChange = new EventEmitter<boolean>();
   @Output() showVolumeOverlapChange = new EventEmitter<boolean>();
   @Output() showSmaChange = new EventEmitter<boolean>();
+  @Output() showDlSeq9Change = new EventEmitter<boolean>();
+
   @Output() smasChange = new EventEmitter<any[]>();
   @Output() apply = new EventEmitter<void>();
   @Input() smas: any[] = [

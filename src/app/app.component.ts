@@ -59,6 +59,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   // SMA and D-Mark settings
   showDMark = false;
+  showDlSeq9 = false;
   showVolumeOverlap = false;
   showSma = false;
   latestBarColor: string = '#1aff1a';
@@ -123,6 +124,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         showDMark: this.showDMark,
         showVolumeOverlap: this.showVolumeOverlap,
         showSma: this.showSma,
+        showDlSeq9: this.showDlSeq9,
       })
       .subscribe({
         next: () => (this.saveStatus = 'success'),
@@ -139,6 +141,7 @@ export class AppComponent implements OnInit, AfterViewInit {
           this.showVolumeOverlap =
             layout.showVolumeOverlap ?? this.showVolumeOverlap;
           this.showSma = layout.showSma ?? this.showSma;
+          this.showDlSeq9 = layout.showDlSeq9 ?? this.showDlSeq9;
         }
       },
       error: (err) => {
@@ -341,6 +344,11 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   onShowDMarkChange(val: boolean) {
     this.showDMark = val;
+    this.saveLayout();
+  }
+
+  onShowDlSeq9Change(val: boolean) {
+    this.showDlSeq9 = val;
     this.saveLayout();
   }
 

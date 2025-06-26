@@ -16,6 +16,7 @@ export class LayoutService {
       showDMark: boolean;
       showVolumeOverlap: boolean;
       showSma: boolean;
+      showDlSeq9: boolean;
     }
   ) {
     return this.http.post(`${this.apiUrl}/layout`, {
