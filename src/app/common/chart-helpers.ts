@@ -1,7 +1,11 @@
 import { EventEmitter } from '@angular/core';
-import { buildDMarkMarkers, buildDLSeqMarkers } from '../common/marker-helpers';
+import {
+  buildDLSeqMarkers,
+  buildDMarkMarkers_TD13,
+} from '../common/marker-helpers';
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
+import { CandlestickData } from 'lightweight-charts';
 
 export const dlSeq9Click$ = new EventEmitter<{
   time: string | number;
@@ -150,7 +154,13 @@ export function loadSymbolDataExternal(
       }
 
       // D-Mark markers
-      const markers = buildDMarkMarkers(data);
+      const markers = buildDMarkMarkers_TD13(data);
+      markers.sort((a: any, b: any) =>
+        typeof a.time === 'number' && typeof b.time === 'number'
+          ? a.time - b.time
+          : new Date(a.time as any).getTime() -
+            new Date(b.time as any).getTime()
+      );
       if (chartService.candleSeries) {
         chartService.candleSeries.setMarkers(showDMark ? markers : []);
       }

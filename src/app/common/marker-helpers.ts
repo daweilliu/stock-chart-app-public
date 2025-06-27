@@ -39,7 +39,7 @@ export function buildDLSeqMarkers(
   return markers;
 }
 
-export function buildDMarkMarkers02(data: CandlestickData[]): any[] {
+export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
   const markers: any[] = [];
   let bull: any[] = [];
   let bear: any[] = [];
@@ -56,8 +56,6 @@ export function buildDMarkMarkers02(data: CandlestickData[]): any[] {
   let lowTrendLine = 0;
 
   // For PineScript's [1] and [2] historical referencing
-  let prevBuySet = 0,
-    prevSellSet = 0;
   let prevBuyCounCC = 0,
     prevSellCounCC = 0;
   let prevBuyCounCC8Close = 0,
@@ -65,58 +63,38 @@ export function buildDMarkMarkers02(data: CandlestickData[]): any[] {
   let prevHighTrendLine = 0,
     prevLowTrendLine = 0;
 
-  for (let i = 4; i < data.length; i++) {
+  let lastBullIdx = -1;
+  let lastBearIdx = -1;
+
+  // Now start from i = 5, since we reference i-5
+  for (let i = 5; i < data.length; i++) {
     const close = data[i].close;
     const high = data[i].high;
     const low = data[i].low;
     const close4 = data[i - 4].close;
-    const close2 = i >= 2 ? data[i - 2].close : undefined;
-    const high2 = i >= 2 ? data[i - 2].high : undefined;
-    const low2 = i >= 2 ? data[i - 2].low : undefined;
+    const close5 = data[i - 5].close;
+    const closePrev = data[i - 1].close;
+    const close2 = data[i - 2]?.close;
+    const high2 = data[i - 2]?.high;
+    const low2 = data[i - 2]?.low;
 
-    // --- TD9 SETUP LOGIC (matching Pine Script) ---
-    if (close > close4) {
-      sellSet = prevSellSet === 9 ? 1 : prevSellSet + 1;
-    } else {
-      sellSet = 0;
-      bear = [];
-    }
-    if (close < close4) {
-      buySet = prevBuySet === 9 ? 1 : prevBuySet + 1;
-    } else {
-      buySet = 0;
-      bull = [];
-    }
-
-    // --- TD9 Markers ---
-    if (buySet > 0 && buySet <= 9) {
-      bull.push({
-        time: data[i].time,
-        position: 'belowBar',
-        color: buySet === 9 ? 'deeppink' : 'lightblue',
-        text: `${buySet}`,
-        fontWeight: buySet === 9 ? 'bold' : undefined,
-        fontSize: buySet === 9 ? 18 : undefined,
-      });
-      if (buySet === 9) {
-        // Insert bull items into markers
-        markers.push(...bull);
-        // Sort markers: by time, and if time is the same, bull items first
-        markers.sort((a, b) => {
-          const ta =
-            typeof a.time === 'string' ? Date.parse(a.time) : Number(a.time);
-          const tb =
-            typeof b.time === 'string' ? Date.parse(b.time) : Number(b.time);
-          if (ta !== tb) return ta - tb;
-          // If times are equal, bull items (position: 'belowBar') come first
-          if (a.position === 'belowBar' && b.position !== 'belowBar') return -1;
-          if (a.position !== 'belowBar' && b.position === 'belowBar') return 1;
-          return 0;
-        });
-        bull = [];
-      }
-    }
-    if (sellSet > 0 && sellSet <= 9) {
+    // --- SELL TD9 (uptrend, bearish reversal) ---
+    if (
+      close > close4 && // a) today > 4 bars ago
+      closePrev <= close5 // b) yesterday <= 5 bars ago
+    ) {
+      sellSet = 1;
+      bear = [
+        {
+          time: data[i].time,
+          position: 'aboveBar',
+          color: 'lightblue',
+          text: '1',
+        },
+      ];
+      lastBearIdx = i;
+    } else if (close > close4 && sellSet > 0 && sellSet < 9) {
+      sellSet++;
       bear.push({
         time: data[i].time,
         position: 'aboveBar',
@@ -125,26 +103,56 @@ export function buildDMarkMarkers02(data: CandlestickData[]): any[] {
         fontWeight: sellSet === 9 ? 'bold' : undefined,
         fontSize: sellSet === 9 ? 18 : undefined,
       });
+      lastBearIdx = i;
       if (sellSet === 9) {
         markers.push(...bear);
-        // Sort markers: by time, and if time is the same, bear items (position: 'aboveBar') come after bull items
-        markers.sort((a, b) => {
-          const ta =
-            typeof a.time === 'string' ? Date.parse(a.time) : Number(a.time);
-          const tb =
-            typeof b.time === 'string' ? Date.parse(b.time) : Number(b.time);
-          if (ta !== tb) return ta - tb;
-          // If times are equal, bull items (position: 'belowBar') come first
-          if (a.position === 'aboveBar' && b.position !== 'aboveBar') return -1;
-          if (a.position !== 'aboveBar' && b.position === 'aboveBar') return 1;
-          return 0;
-        });
         bear = [];
+        lastBearIdx = -1;
       }
+    } else {
+      sellSet = 0;
+      bear = [];
+      lastBearIdx = -1;
     }
 
-    // --- TD13 COUNTDOWN LOGIC (Pine Script style) ---
-    // High/Low trend lines for full stop on TD13
+    // --- BUY TD9 (downtrend, bullish reversal) ---
+    if (
+      close < close4 && // a) today < 4 bars ago
+      closePrev >= close5 // b) yesterday >= 5 bars ago
+    ) {
+      buySet = 1;
+      bull = [
+        {
+          time: data[i].time,
+          position: 'belowBar',
+          color: 'lightblue',
+          text: '1',
+        },
+      ];
+      lastBullIdx = i;
+    } else if (close < close4 && buySet > 0 && buySet < 9) {
+      buySet++;
+      bull.push({
+        time: data[i].time,
+        position: 'belowBar',
+        color: buySet === 9 ? 'deeppink' : 'lightblue',
+        text: `${buySet}`,
+        fontWeight: buySet === 9 ? 'bold' : undefined,
+        fontSize: buySet === 9 ? 18 : undefined,
+      });
+      lastBullIdx = i;
+      if (buySet === 9) {
+        markers.push(...bull);
+        bull = [];
+        lastBullIdx = -1;
+      }
+    } else {
+      buySet = 0;
+      bull = [];
+      lastBullIdx = -1;
+    }
+
+    // --- TD13 COUNTDOWN LOGIC (unchanged) ---
     const highest9 = Math.max(
       ...data.slice(Math.max(0, i - 8), i + 1).map((d) => d.high)
     );
@@ -226,8 +234,6 @@ export function buildDMarkMarkers02(data: CandlestickData[]): any[] {
     }
 
     // --- Prepare previous state for next iteration ---
-    prevBuySet = buySet;
-    prevSellSet = sellSet;
     prevBuyCounCC = buyCounCC;
     prevSellCounCC = sellCounCC;
     prevBuyCounCC8Close = buyCounCC8Close;
@@ -236,133 +242,15 @@ export function buildDMarkMarkers02(data: CandlestickData[]): any[] {
     prevLowTrendLine = lowTrendLine;
   }
 
-  return markers;
-}
+  // ---- FINAL: Show incomplete active TD9 at right edge (if any) ----
+  // Only show if it's the last incomplete one at the most recent bars
 
-export function buildDMarkMarkers(data: CandlestickData[]): any[] {
-  const markers: any[] = [];
-  let count = 0;
-  let direction: 'bull' | 'bear' | null = null;
-  let seqBuffer: any[] = [];
-  let waitingForFlip = false;
-
-  for (let i = 4; i < data.length; i++) {
-    const close = data[i].close;
-    const close4 = data[i - 4].close;
-
-    if (waitingForFlip) {
-      if (
-        (direction === 'bull' && close < close4) ||
-        (direction === 'bear' && close > close4)
-      ) {
-        waitingForFlip = false;
-        direction = null;
-        count = 0;
-        seqBuffer = [];
-        // After flip, fall through to check for new setup on this bar
-      } else {
-        continue; // Still waiting for flip, skip bar
-      }
-    }
-
-    if (direction === null) {
-      if (close > close4) {
-        direction = 'bull';
-        count = 1;
-        seqBuffer = [
-          {
-            time: data[i].time,
-            position: 'aboveBar',
-            color: 'lightblue',
-            text: '1',
-          },
-        ];
-      } else if (close < close4) {
-        direction = 'bear';
-        count = 1;
-        seqBuffer = [
-          {
-            time: data[i].time,
-            position: 'belowBar',
-            color: 'lightblue',
-            text: '1',
-          },
-        ];
-      }
-      // If neither, do nothing
-    } else if (direction === 'bull') {
-      if (close > close4) {
-        count++;
-        seqBuffer.push({
-          time: data[i].time,
-          position: 'aboveBar',
-          color: count === 9 ? 'deeppink' : 'lightblue',
-          text: `${count}`,
-          fontWeight: count === 9 ? 'bold' : undefined,
-          fontSize: count === 9 ? 20 : undefined,
-        });
-        if (count === 9) {
-          markers.push(...seqBuffer);
-          waitingForFlip = true;
-        }
-      } else {
-        // Sequence broken before 9
-        direction = null;
-        count = 0;
-        seqBuffer = [];
-        // ---- KEY CHANGE: after break, immediately check if a new sequence starts on this same bar ----
-        if (close < close4) {
-          direction = 'bear';
-          count = 1;
-          seqBuffer = [
-            {
-              time: data[i].time,
-              position: 'belowBar',
-              color: 'lightblue',
-              text: '1',
-            },
-          ];
-        }
-      }
-    } else if (direction === 'bear') {
-      if (close < close4) {
-        count++;
-        seqBuffer.push({
-          time: data[i].time,
-          position: 'belowBar',
-          color: count === 9 ? 'deeppink' : 'lightblue',
-          text: `${count}`,
-          fontWeight: count === 9 ? 'bold' : undefined,
-          fontSize: count === 9 ? 20 : undefined,
-        });
-        if (count === 9) {
-          markers.push(...seqBuffer);
-          waitingForFlip = true;
-        }
-      } else {
-        // Sequence broken before 9
-        direction = null;
-        count = 0;
-        seqBuffer = [];
-        // ---- KEY CHANGE: after break, immediately check if a new sequence starts on this same bar ----
-        if (close > close4) {
-          direction = 'bull';
-          count = 1;
-          seqBuffer = [
-            {
-              time: data[i].time,
-              position: 'aboveBar',
-              color: 'lightblue',
-              text: '1',
-            },
-          ];
-        }
-      }
-    }
+  if (bull.length > 0 && bull.length < 9 && lastBullIdx === data.length - 1) {
+    markers.push(...bull);
   }
-  // After the loop ends, handle incomplete setup at right edge:
-  if (!waitingForFlip && seqBuffer.length > 0 && count < 9) {
-    markers.push(...seqBuffer);
+  if (bear.length > 0 && bear.length < 9 && lastBearIdx === data.length - 1) {
+    markers.push(...bear);
   }
+
   return markers;
 }
