@@ -252,5 +252,89 @@ export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
     markers.push(...bear);
   }
 
+  // === 3rd Marker: New High/Low Streak after any TD9 completes, stops at next TD9 ===
+  // === 3rd Marker: New High/Low Streak after any TD9 completes, show only 3, 6, 9 ===
+
+  // Step 1: Collect all TD9 completions
+  const streakStarts: { idx: number; type: 'high' | 'low' }[] = [];
+  let buySetTemp = 0,
+    sellSetTemp = 0;
+
+  for (let i = 5; i < data.length; i++) {
+    const close = data[i].close;
+    const close4 = data[i - 4].close;
+    const close5 = data[i - 5].close;
+    const closePrev = data[i - 1].close;
+
+    // -- SELL TD9 detect
+    if (close > close4 && closePrev <= close5) {
+      sellSetTemp = 1;
+    } else if (close > close4 && sellSetTemp > 0 && sellSetTemp < 9) {
+      sellSetTemp++;
+      if (sellSetTemp === 9) {
+        streakStarts.push({ idx: i, type: 'high' });
+      }
+    } else {
+      sellSetTemp = 0;
+    }
+
+    // -- BUY TD9 detect
+    if (close < close4 && closePrev >= close5) {
+      buySetTemp = 1;
+    } else if (close < close4 && buySetTemp > 0 && buySetTemp < 9) {
+      buySetTemp++;
+      if (buySetTemp === 9) {
+        streakStarts.push({ idx: i, type: 'low' });
+      }
+    } else {
+      buySetTemp = 0;
+    }
+  }
+
+  // Step 2: For each streak, count new highs/lows until next TD9
+  for (let s = 0; s < streakStarts.length; s++) {
+    const { idx, type } = streakStarts[s];
+    let nextTD9Idx = data.length;
+    if (s + 1 < streakStarts.length) {
+      nextTD9Idx = streakStarts[s + 1].idx;
+    }
+    let streakCount = 0;
+    let lastValue = type === 'high' ? data[idx].high : data[idx].low;
+
+    for (let j = idx + 1; j < nextTD9Idx; j++) {
+      if (type === 'high') {
+        if (data[j].high > lastValue) {
+          streakCount++;
+          lastValue = data[j].high;
+          if ([3, 6, 9].includes(streakCount)) {
+            markers.push({
+              time: data[j].time,
+              position: 'aboveBar',
+              color: 'orange',
+              text: `${streakCount}`,
+              fontSize: 16,
+              fontWeight: 'bold',
+            });
+          }
+        }
+      } else if (type === 'low') {
+        if (data[j].low < lastValue) {
+          streakCount++;
+          lastValue = data[j].low;
+          if ([3, 6, 9].includes(streakCount)) {
+            markers.push({
+              time: data[j].time,
+              position: 'belowBar',
+              color: 'deepskyblue',
+              text: `${streakCount}`,
+              fontSize: 16,
+              fontWeight: 'bold',
+            });
+          }
+        }
+      }
+    }
+  }
+
   return markers;
 }
