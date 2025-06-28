@@ -98,7 +98,7 @@ export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
       bear.push({
         time: data[i].time,
         position: 'aboveBar',
-        color: sellSet === 9 ? 'deeppink' : 'lightblue',
+        color: sellSet === 9 ? 'deeppink' : 'deepskyblue',
         text: `${sellSet}`,
         fontWeight: sellSet === 9 ? 'bold' : undefined,
         fontSize: sellSet === 9 ? 18 : undefined,
@@ -135,7 +135,7 @@ export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
       bull.push({
         time: data[i].time,
         position: 'belowBar',
-        color: buySet === 9 ? 'deeppink' : 'lightblue',
+        color: buySet === 9 ? 'deeppink' : 'deepskyblue',
         text: `${buySet}`,
         fontWeight: buySet === 9 ? 'bold' : undefined,
         fontSize: buySet === 9 ? 18 : undefined,
@@ -325,7 +325,7 @@ export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
             markers.push({
               time: data[j].time,
               position: 'belowBar',
-              color: 'deepskyblue',
+              color: 'orange',
               text: `${streakCount}`,
               fontSize: 16,
               fontWeight: 'bold',
