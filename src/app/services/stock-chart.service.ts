@@ -4,6 +4,9 @@ import {
   IChartApi,
   CandlestickData,
   LineData,
+  CandlestickSeries,
+  HistogramSeries,
+  LineSeries,
 } from 'lightweight-charts';
 
 @Injectable({ providedIn: 'root' })
@@ -25,7 +28,9 @@ export class StockChartService {
       },
       leftPriceScale: { visible: true, borderColor: '#555' },
     });
-    this.candleSeries = this.chart.addCandlestickSeries({
+
+    this.candleSeries = this.chart.addSeries(CandlestickSeries, {
+      // options for the candlestick series
       priceScaleId: 'left',
       upColor: '#00ff00',
       downColor: '#ff0000',
@@ -34,12 +39,14 @@ export class StockChartService {
       wickUpColor: '#00ff00',
       wickDownColor: '#ff0000',
     });
-    this.volumeSeries = this.chart.addHistogramSeries({
-      color: '#888',
-      priceFormat: { type: 'volume' },
-      priceScaleId: 'volume',
+    this.volumeSeries = this.chart.addSeries(HistogramSeries, {
+      color: '#888888',
+      priceFormat: { type: 'volume', precision: 0, minMove: 1 },
+      priceScaleId: 'volume', // Assign a price scale ID
     });
-    this.chart.priceScale('volume').applyOptions({
+
+    // Set the scaleMargins on the price scale associated with the volume series
+    this.volumeSeries.priceScale().applyOptions({
       scaleMargins: { top: 0.85, bottom: 0 },
     });
     return this.chart;
@@ -56,7 +63,7 @@ export class StockChartService {
   addSmaLine(data: CandlestickData[], period: number, color: string) {
     const smaData = this.calculateSMA(data, period);
 
-    const smaSeries = this.chart.addLineSeries({
+    const smaSeries = this.chart.addSeries(LineSeries, {
       color,
       lineWidth: 2,
       priceLineVisible: false,

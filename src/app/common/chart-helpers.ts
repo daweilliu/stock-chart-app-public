@@ -5,7 +5,7 @@ import {
 } from '../common/marker-helpers';
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
-import { CandlestickData } from 'lightweight-charts';
+import { CandlestickData, createSeriesMarkers } from 'lightweight-charts';
 
 export const dlSeq9Click$ = new EventEmitter<{
   time: string | number;
@@ -162,7 +162,10 @@ export function loadSymbolDataExternal(
             new Date(b.time as any).getTime()
       );
       if (chartService.candleSeries) {
-        chartService.candleSeries.setMarkers(showDMark ? markers : []);
+        createSeriesMarkers(
+          chartService.candleSeries,
+          showDMark ? markers : []
+        );
       }
 
       const swingBars = 3;
@@ -217,13 +220,12 @@ export function progressDLSeq9(
   if (isSwingLow(data, clickedIndex, swingBars)) {
     const markers = buildDLSeqMarkers(data, clickedIndex, 'up');
     if (chartService.candleSeries) {
-      chartService.candleSeries.setMarkers(markers);
+      createSeriesMarkers(chartService.candleSeries, markers);
       isDLSeq9Showing = markers.length > 0;
     }
   } else if (isSwingHigh(data, clickedIndex, swingBars)) {
     const markers = buildDLSeqMarkers(data, clickedIndex, 'down');
     if (chartService.candleSeries) {
-      chartService.candleSeries.setMarkers(markers);
       isDLSeq9Showing = markers.length > 0;
     }
   }

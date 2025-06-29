@@ -21,6 +21,7 @@ import {
 } from '../common/chart-helpers';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { createSeriesMarkers } from 'lightweight-charts';
 
 @Component({
   selector: 'app-stock-chart',
@@ -208,7 +209,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
 
   deleteMarkers() {
     if (this.chartService.candleSeries) {
-      this.chartService.candleSeries.setMarkers([]); // Remove all markers
+      createSeriesMarkers(this.chartService.candleSeries, []);
     }
     this.showDLSeq9 = false; // Hide the popup menu if needed
     this.startTime = null; // Reset start time
