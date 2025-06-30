@@ -4,39 +4,45 @@ export function buildDLSeqMarkers(
   data: CandlestickData[],
   startIndex: number,
   startMode: 'up' | 'down' = 'up'
-): any[] {
+): { markers: any[]; specialNines: any[] } {
   const markers: any[] = [];
+  const specialNines: any[] = []; // Only every 3rd "9"
   let mode: 'up' | 'down' = startMode;
   let count = 1;
+  let nineCount = 0; // To count occurrences of "9"
 
   for (let i = startIndex; i < data.length; i++) {
     markers.push({
       time: data[i].time,
       position: mode === 'up' ? 'aboveBar' : 'belowBar',
       color: mode === 'up' ? 'yellow' : 'cyan',
-      text: String(count),
-      size: count === 9 ? 2 : 1,
-      fontWeight: count === 9 ? 'bold' : undefined,
+      text: count === 9 ? '9' : String(count),
+      fontSize: count === 9 ? 18 : 12,
+      fontWeight: count === 9 ? 'bold' : 'normal',
     });
 
     if (count === 9) {
-      // Add 9 marker (already added above), now immediately add "1" marker on the same bar (overlap)
-      // Flip mode for next marker
+      nineCount++;
+      if (nineCount % 3 === 0) {
+        specialNines.push({ time: data[i].time }); // This is every 3rd "9"
+      }
+      // Continue flipping logic
       const nextMode = mode === 'up' ? 'down' : 'up';
       markers.push({
         time: data[i].time,
         position: nextMode === 'up' ? 'aboveBar' : 'belowBar',
         color: nextMode === 'up' ? 'yellow' : 'cyan',
         text: '1',
-        size: 1,
+        fontSize: 12,
+        fontWeight: 'normal',
       });
       mode = nextMode;
-      count = 2; // because "1" is already displayed at this bar
+      count = 2;
     } else {
       count++;
     }
   }
-  return markers;
+  return { markers, specialNines };
 }
 
 export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
@@ -88,7 +94,7 @@ export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
         {
           time: data[i].time,
           position: 'aboveBar',
-          color: 'lightblue',
+          color: 'deepskyblue',
           text: '1',
         },
       ];
@@ -99,9 +105,10 @@ export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
         time: data[i].time,
         position: 'aboveBar',
         color: sellSet === 9 ? 'deeppink' : 'deepskyblue',
-        text: `${sellSet}`,
+        text: sellSet === 9 ? '9️⃣' : `${sellSet}`,
         fontWeight: sellSet === 9 ? 'bold' : undefined,
-        fontSize: sellSet === 9 ? 18 : undefined,
+        fontSize: sellSet === 9 ? 28 : undefined,
+        textColor: sellSet === 9 ? 'deeppink' : undefined,
       });
       lastBearIdx = i;
       if (sellSet === 9) {
@@ -125,7 +132,7 @@ export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
         {
           time: data[i].time,
           position: 'belowBar',
-          color: 'lightblue',
+          color: 'deepskyblue',
           text: '1',
         },
       ];
@@ -136,9 +143,10 @@ export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
         time: data[i].time,
         position: 'belowBar',
         color: buySet === 9 ? 'deeppink' : 'deepskyblue',
-        text: `${buySet}`,
+        text: buySet === 9 ? '9️⃣' : `${buySet}`,
         fontWeight: buySet === 9 ? 'bold' : undefined,
-        fontSize: buySet === 9 ? 18 : undefined,
+        fontSize: buySet === 9 ? 28 : undefined,
+        textColor: buySet === 9 ? 'deeppink' : undefined,
       });
       lastBullIdx = i;
       if (buySet === 9) {
@@ -336,5 +344,44 @@ export function buildDMarkMarkers_TD13(data: CandlestickData[]): any[] {
     }
   }
 
+  return markers;
+}
+
+export function buildDLSeqMarkers_backup(
+  data: CandlestickData[],
+  startIndex: number,
+  startMode: 'up' | 'down' = 'up'
+): any[] {
+  const markers: any[] = [];
+  let mode: 'up' | 'down' = startMode;
+  let count = 1;
+
+  for (let i = startIndex; i < data.length; i++) {
+    markers.push({
+      time: data[i].time,
+      position: mode === 'up' ? 'aboveBar' : 'belowBar',
+      color: mode === 'up' ? 'yellow' : 'cyan',
+      text: String(count),
+      size: count === 9 ? 2 : 1,
+      fontWeight: count === 9 ? 'bold' : undefined,
+    });
+
+    if (count === 9) {
+      // Add 9 marker (already added above), now immediately add "1" marker on the same bar (overlap)
+      // Flip mode for next marker
+      const nextMode = mode === 'up' ? 'down' : 'up';
+      markers.push({
+        time: data[i].time,
+        position: nextMode === 'up' ? 'aboveBar' : 'belowBar',
+        color: nextMode === 'up' ? 'yellow' : 'cyan',
+        text: '1',
+        size: 1,
+      });
+      mode = nextMode;
+      count = 2; // because "1" is already displayed at this bar
+    } else {
+      count++;
+    }
+  }
   return markers;
 }
