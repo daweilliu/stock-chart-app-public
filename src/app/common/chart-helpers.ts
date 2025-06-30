@@ -6,6 +6,7 @@ import {
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
 import { VerticalLinePluginService } from '../services/vertical-line-plugin.service';
+import { TrueVerticalLineService } from '../services/true-vertical-line.service';
 import {
   CandlestickData,
   createSeriesMarkers,
@@ -72,7 +73,8 @@ export function loadSymbolDataExternal(
   latestBar: EventEmitter<any>,
   barClicked: EventEmitter<any>,
   dlSeq9Click?: EventEmitter<{ time: string | number; isShowing: boolean }>,
-  verticalLineService?: VerticalLinePluginService
+  verticalLineService?: VerticalLinePluginService,
+  trueVerticalLineService?: TrueVerticalLineService
 ) {
   const outputsize = getOutputSize(range);
   const interval = getInterval(timeframe);
@@ -105,14 +107,14 @@ export function loadSymbolDataExternal(
 
       const minPrice = Math.min(...data.map((d: any) => d.low));
       const maxPrice = Math.max(...data.map((d: any) => d.high));
-      
+
       // Remove the old histogram-based vertical line series
       // const verticalLineSeries = chartService.chart.addSeries(HistogramSeries, {
       //   color: 'lightblue',
       //   priceScaleId: 'right',
       //   baseLineColor: 'lightblue',
       // });
-      
+
       const volumeData = reversedValues.map((bar: any) => ({
         time: bar.datetime,
         value: parseFloat(bar.volume),
@@ -134,7 +136,8 @@ export function loadSymbolDataExternal(
           showDlSeq9,
           chartService,
           swingBars,
-          verticalLineService
+          verticalLineService,
+          trueVerticalLineService
         );
 
         // Emit to parent if EventEmitter provided
@@ -233,7 +236,8 @@ export function progressDLSeq9(
   showDlSeq9: boolean,
   chartService: StockChartService,
   swingBars: number,
-  verticalLineService?: VerticalLinePluginService
+  verticalLineService?: VerticalLinePluginService,
+  trueVerticalLineService?: TrueVerticalLineService
 ): boolean {
   let isDLSeq9Showing = false;
   const minPrice = Math.min(...data.map((d) => d.low));
@@ -267,8 +271,30 @@ export function progressDLSeq9(
     }
   }
 
-  // Create vertical lines using the plugin
-  if (verticalLineService && specialAllNines.length > 0) {
+  // Create TRUE vertical lines using the new service
+  if (trueVerticalLineService && specialAllNines.length > 0) {
+    const uniqueTimes = Array.from(
+      new Set(specialAllNines.map((nine) => nine.time))
+    ).sort((a, b) => {
+      const ta = typeof a === 'string' ? Date.parse(a) : Number(a);
+      const tb = typeof b === 'string' ? Date.parse(b) : Number(b);
+      return ta - tb;
+    });
+
+    console.log('🎯 Creating TRUE vertical lines for TD9 events:', uniqueTimes);
+    
+    // Use the TRUE vertical line service to create actual vertical lines
+    trueVerticalLineService
+      .createVerticalLines(chartService.chart, uniqueTimes)
+      .then((lines) => {
+        console.log(`✅ Created ${lines.length} TRUE vertical lines!`);
+      })
+      .catch((error) => {
+        console.error('❌ Failed to create TRUE vertical lines:', error);
+      });
+  }
+  // Fallback to plugin-based approach if true vertical lines fail
+  else if (verticalLineService && specialAllNines.length > 0) {
     const uniqueTimes = Array.from(
       new Set(specialAllNines.map((nine) => nine.time))
     ).sort((a, b) => {
@@ -278,12 +304,37 @@ export function progressDLSeq9(
     });
 
     // Use the vertical line plugin to create beautiful vertical lines
-    verticalLineService.createVerticalLines(chartService.chart, uniqueTimes)
+    verticalLineService
+      .createVerticalLines(
+        chartService.chart,
+        chartService.candleSeries,
+        uniqueTimes
+      )
       .then((lines) => {
-        console.log(`Created ${lines.length} vertical lines using plugin`);
+        console.log(`✅ Created ${lines.length} vertical lines using plugin`);
       })
       .catch((error) => {
-        console.error('Failed to create vertical lines:', error);
+        console.error('❌ Failed to create vertical lines with plugin:', error);
+
+        // Fallback: Create simple markers for vertical lines
+        const verticalMarkers = uniqueTimes.map((time) => ({
+          time: time,
+          position: 'inBar' as const,
+          color: '#ff6b6b',
+          shape: 'circle' as const,
+          text: '●',
+          size: 2,
+        }));
+
+        // Add fallback markers to existing markers
+        if (chartService.candleSeries) {
+          const existingMarkers: any[] = [];
+          const allMarkers = [...existingMarkers, ...verticalMarkers];
+          createSeriesMarkers(chartService.candleSeries, allMarkers);
+          console.log(
+            `📍 Created ${verticalMarkers.length} fallback vertical markers`
+          );
+        }
       });
   }
 

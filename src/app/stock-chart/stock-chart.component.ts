@@ -13,6 +13,8 @@ import {
 } from '@angular/core';
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
+import { VerticalLinePluginService } from '../services/vertical-line-plugin.service';
+import { TrueVerticalLineService } from '../services/true-vertical-line.service';
 import { CommonModule } from '@angular/common';
 import {
   loadSymbolDataExternal,
@@ -85,13 +87,17 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
 
   constructor(
     private chartService: StockChartService,
-    private dataService: StockDataService
+    private dataService: StockDataService,
+    private verticalLineService: VerticalLinePluginService,
+    private trueVerticalLineService: TrueVerticalLineService
   ) {
     this.showDLSeq9 = false;
   }
 
   ngAfterViewInit(): void {
     this.chartService.initChart(this.chartContainer.nativeElement);
+    // Set up the true vertical line service with the chart container
+    this.trueVerticalLineService.setChartContainer(this.chartContainer.nativeElement);
     this.loadSymbolData();
     this.resizeChart();
   }
@@ -139,7 +145,9 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
       this.dataService,
       this.latestBar,
       this.barClicked,
-      this.dlSeq9Click // Pass the EventEmitter for DLSeq9 click info
+      this.dlSeq9Click, // Pass the EventEmitter for DLSeq9 click info
+      this.verticalLineService, // Add the vertical line service
+      this.trueVerticalLineService // Add the TRUE vertical line service
     );
   }
 

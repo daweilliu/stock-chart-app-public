@@ -1,52 +1,47 @@
+/*
 // Example of how to update your stock chart component
 // Add this to your stock-chart.component.ts
 
 import { VerticalLinePluginService } from '../services/vertical-line-plugin.service';
+import { TrueVerticalLineService } from '../services/true-vertical-line.service';
 
-// In your constructor, inject the service:
+// In your constructor, inject both services:
 constructor(
   private chartService: StockChartService,
   private dataService: StockDataService,
-  private verticalLineService: VerticalLinePluginService
+  private verticalLineService: VerticalLinePluginService,
+  private trueVerticalLineService: TrueVerticalLineService
 ) {}
 
-// When calling loadSymbolDataExternal, pass the service:
+// When calling loadSymbolDataExternal, pass both services:
 loadSymbolDataExternal(
-  this.symbol,
-  this.range,
-  this.timeframe,
-  this.showSma,
-  this.showSma1,
-  this.sma1Period,
-  this.showSma2,
-  this.sma2Period,
-  this.showSma3,
-  this.sma3Period,
-  this.showSma4,
-  this.sma4Period,
-  this.showSma5,
-  this.sma5Period,
-  this.showDMark,
-  this.showDlSeq9,
-  this.showVolumeOverlap,
-  this.chartService,
-  this.dataService,
-  this.latestBar,
-  this.barClicked,
-  this.dlSeq9Click,
-  this.verticalLineService // <- Add this parameter
+  // ... other parameters
+  this.verticalLineService, // <- Plugin-based fallback
+  this.trueVerticalLineService // <- TRUE vertical lines (HTML overlay)
 );
 
-// You can also manually create vertical lines:
-async createCustomVerticalLines() {
+// You can also manually create TRUE vertical lines:
+async createCustomTrueVerticalLines() {
   const times = ['2024-01-15', '2024-02-20', '2024-03-10']; // Your special dates
   try {
-    const lines = await this.verticalLineService.createVerticalLines(
-      this.chartService.chart, 
-      times
-    );
-    console.log('Created vertical lines:', lines);
+    if (this.chartService && this.chartService.chart) {
+      // Initialize the service with the chart container
+      this.trueVerticalLineService.setChartContainer(this.chartContainer.nativeElement);
+      
+      // Create the vertical lines
+      const lines = await this.trueVerticalLineService.createVerticalLines(
+        this.chartService.chart,
+        times
+      );
+      console.log('Created TRUE vertical lines:', lines);
+    } else {
+      console.error('Chart not available');
+    }
   } catch (error) {
-    console.error('Error creating vertical lines:', error);
+    console.error('Error creating TRUE vertical lines:', error);
   }
 }
+*/
+
+// This is just an example file showing integration patterns
+export {};

@@ -64,6 +64,7 @@ Make sure your `src/index.html` includes:
 ## 🎨 **Plugin Features:**
 
 The new vertical lines will have:
+
 - ✅ **Clean, professional appearance**
 - ✅ **Customizable colors** (currently set to red `#ff6b6b`)
 - ✅ **Adjustable opacity** (70% opacity for subtle effect)
@@ -77,11 +78,11 @@ You can customize the vertical lines by modifying the `createVerticalLines` meth
 ```typescript
 const verticalLine = new this.verticalLinePlugin({
   time: time,
-  color: '#00ff00',        // Green color
-  width: 3,               // Thicker line
-  style: 'dashed',        // Dashed line style
-  opacity: 0.8,           // More opaque
-  showLabel: true,        // Show time label
+  color: "#00ff00", // Green color
+  width: 3, // Thicker line
+  style: "dashed", // Dashed line style
+  opacity: 0.8, // More opaque
+  showLabel: true, // Show time label
 });
 ```
 

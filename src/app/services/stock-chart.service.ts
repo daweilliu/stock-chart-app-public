@@ -14,6 +14,7 @@ export class StockChartService {
   chart!: IChartApi;
   candleSeries: any;
   volumeSeries: any;
+  private currentVerticalLines: any[] = []; // Track current vertical lines
 
   initChart(container: HTMLElement): IChartApi {
     this.chart = createChart(container, {
@@ -24,7 +25,7 @@ export class StockChartService {
       layout: { background: { color: '#181922' }, textColor: '#cccccc' },
       grid: {
         vertLines: { color: '#22232a' },
-        horzLines: { color: ' }#22232a' },
+        horzLines: { color: '#22232a' },
       },
       leftPriceScale: { visible: true, borderColor: '#555' },
     });
@@ -82,5 +83,20 @@ export class StockChartService {
     return result;
   }
 
-  // Add marker and other chart logic as needed
+  // Vertical line management methods
+  addVerticalLines(verticalLines: any[]) {
+    // This method is now handled by VerticalLinePluginService
+    // Keep for backward compatibility
+    this.currentVerticalLines = verticalLines;
+  }
+
+  clearVerticalLines() {
+    // This method is now handled by VerticalLinePluginService
+    // Keep for backward compatibility
+    this.currentVerticalLines = [];
+  }
+
+  getCurrentVerticalLines() {
+    return this.currentVerticalLines;
+  }
 }
