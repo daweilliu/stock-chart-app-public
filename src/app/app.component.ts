@@ -322,7 +322,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   onDragProgress(event: Event): void {
-    console.log('✅ Dragging in progress!', event);
+    // Handle drag progress if needed
   }
 
   toggleSettingsPanel() {

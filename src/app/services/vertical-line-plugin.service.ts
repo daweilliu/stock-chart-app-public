@@ -9,14 +9,12 @@ export class VerticalLinePluginService {
   private currentVerticalLines: any[] = [];
 
   async loadVerticalLinePlugin(): Promise<any> {
-    console.log('🔧 Loading dashed vertical line plugin...');
     try {
       // Check if plugin is already loaded
       if (
         (window as any).DashedVertLine ||
         (window as any).DashedVerticalLine
       ) {
-        console.log('✅ Dashed plugin already loaded from global scope');
         return (
           (window as any).DashedVertLine || (window as any).DashedVerticalLine
         );
@@ -24,14 +22,12 @@ export class VerticalLinePluginService {
 
       // Load the dashed vertical line script
       const pluginUrl = 'assets/plugins/vertical-line/dashed-vertical-line.js';
-      console.log('📥 Loading dashed plugin script from:', pluginUrl);
       await this.loadScript(pluginUrl);
 
       // Return the plugin class from global scope
       const plugin =
         (window as any).DashedVertLine || (window as any).DashedVerticalLine;
       if (plugin) {
-        console.log('✅ Dashed plugin loaded successfully:', plugin);
         return plugin;
       } else {
         console.warn(
@@ -60,9 +56,6 @@ export class VerticalLinePluginService {
     series: any,
     times: (string | number)[]
   ): Promise<any[]> {
-    console.log('🎯 Creating vertical lines for times:', times);
-    console.log('📊 Chart:', !!chart, 'Series:', !!series);
-
     // Clear existing lines first
     this.removeVerticalLines(chart);
 
@@ -71,25 +64,16 @@ export class VerticalLinePluginService {
       const VerticalLineClass = await this.loadVerticalLinePlugin();
 
       if (VerticalLineClass) {
-        console.log('✅ Using dashed vertical line plugin');
-
         const newVerticalLines: any[] = [];
 
-        times.forEach((time, index) => {
-          console.log(
-            `📍 Creating dashed vertical line ${index + 1}/${
-              times.length
-            } at time:`,
-            time
-          );
-
+        times.forEach((time) => {
           // Create a white dashed vertical line
           const verticalLine = new VerticalLineClass(chart, series, time, {
             color: 'rgba(255, 255, 255, 0.9)', // Bright white with slight transparency
-            width: 1, // Thin line
+            width: 2, // Slightly thicker line for better visibility
             dashed: true,
-            dashLength: 5,
-            dashGap: 3,
+            dashLength: 8, // Longer dashes for more prominent appearance
+            dashGap: 4, // Larger gaps between dashes
             showLabel: false,
           });
 
@@ -101,9 +85,6 @@ export class VerticalLinePluginService {
         });
 
         this.currentVerticalLines = newVerticalLines;
-        console.log(
-          `✅ Created ${newVerticalLines.length} dashed vertical lines`
-        );
         return newVerticalLines;
       }
     } catch (error) {
@@ -114,17 +95,9 @@ export class VerticalLinePluginService {
     }
 
     // Fallback: Create enhanced markers that simulate vertical lines
-    console.log('⚠️ Using marker-based fallback for vertical lines');
     const verticalLineMarkers: any[] = [];
 
-    times.forEach((time, index) => {
-      console.log(
-        `📍 Creating fallback vertical line marker ${index + 1}/${
-          times.length
-        } at time:`,
-        time
-      );
-
+    times.forEach((time) => {
       // Create multiple very small white markers to simulate a vertical line
       const baseMarker = {
         time: time,
@@ -153,17 +126,12 @@ export class VerticalLinePluginService {
     // Set markers on the series
     if (verticalLineMarkers.length > 0) {
       series.setMarkers(verticalLineMarkers);
-      console.log(
-        `✅ Created ${verticalLineMarkers.length} fallback markers as vertical lines`
-      );
     }
 
     return verticalLineMarkers;
   }
 
   removeVerticalLines(chart: any) {
-    console.log('🧹 Removing existing vertical lines');
-
     // Remove plugin-based vertical lines
     if (this.currentVerticalLines.length > 0) {
       this.currentVerticalLines.forEach((line) => {

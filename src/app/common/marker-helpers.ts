@@ -23,9 +23,21 @@ export function buildDLSeqMarkers(
 
     if (count === 9) {
       nineCount++;
-      if (nineCount % 3 === 0) {
-        specialNines.push({ time: data[i].time }); // This is every 3rd "9"
+
+      // Show vertical lines at every 3rd DL Sequence 9 (3rd, 6th, 9th, etc.)
+      const isVerticalLineCandidate =
+        nineCount === 3 ||
+        nineCount === 6 ||
+        nineCount === 9 ||
+        nineCount === 12 ||
+        nineCount === 15 ||
+        nineCount === 18 ||
+        nineCount === 21;
+
+      if (isVerticalLineCandidate) {
+        specialNines.push({ time: data[i].time, value: data[i].close });
       }
+
       // Continue flipping logic
       const nextMode = mode === 'up' ? 'down' : 'up';
       markers.push({
@@ -42,6 +54,7 @@ export function buildDLSeqMarkers(
       count++;
     }
   }
+
   return { markers, specialNines };
 }
 
@@ -384,4 +397,52 @@ export function buildDLSeqMarkers_backup(
     }
   }
   return markers;
+}
+
+export function getTD9CompletionTimes(data: CandlestickData[]): any[] {
+  const td9Completions: any[] = [];
+  let buySet = 0;
+  let sellSet = 0;
+  let td9Count = 0;
+
+  for (let i = 5; i < data.length; i++) {
+    const close = data[i].close;
+    const close4 = data[i - 4].close;
+    const close5 = data[i - 5].close;
+    const closePrev = data[i - 1].close;
+
+    // --- SELL TD9 (uptrend, bearish reversal) ---
+    if (close > close4 && closePrev <= close5) {
+      sellSet = 1;
+    } else if (close > close4 && sellSet > 0 && sellSet < 9) {
+      sellSet++;
+      if (sellSet === 9) {
+        td9Count++;
+
+        if (td9Count % 3 === 0) {
+          td9Completions.push({ time: data[i].time, value: close });
+        }
+      }
+    } else {
+      sellSet = 0;
+    }
+
+    // --- BUY TD9 (downtrend, bullish reversal) ---
+    if (close < close4 && closePrev >= close5) {
+      buySet = 1;
+    } else if (close < close4 && buySet > 0 && buySet < 9) {
+      buySet++;
+      if (buySet === 9) {
+        td9Count++;
+
+        if (td9Count % 3 === 0) {
+          td9Completions.push({ time: data[i].time, value: close });
+        }
+      }
+    } else {
+      buySet = 0;
+    }
+  }
+
+  return td9Completions;
 }

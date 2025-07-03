@@ -108,15 +108,15 @@ class x {
 
 // Default options for white dashed vertical line
 const w = {
-  color: "rgba(255, 255, 255, 0.8)", // White with slight transparency
+  color: "rgba(255, 255, 255, 0.9)", // Brighter white with less transparency
   labelText: "",
-  width: 1, // Thin line
+  width: 2, // Thicker line for better visibility
   labelBackgroundColor: "rgba(0, 0, 0, 0.7)",
   labelTextColor: "white",
   showLabel: false,
   dashed: true, // Enable dashed line
-  dashLength: 4,
-  dashGap: 3,
+  dashLength: 8, // Longer dashes for more prominent appearance
+  dashGap: 4, // Larger gaps between dashes
 };
 
 class V {

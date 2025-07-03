@@ -24,13 +24,11 @@ loadSymbolDataExternal(
 async createCustomTrueVerticalLines() {
   const times = ['2024-01-15', '2024-02-20', '2024-03-10']; // Your special dates
   try {
-    if (this.chartService && this.chartService.chart) {
-      // Initialize the service with the chart container
-      this.trueVerticalLineService.setChartContainer(this.chartContainer.nativeElement);
-      
-      // Create the vertical lines
+    if (this.chartService && this.chartService.chart && this.chartService.candleSeries) {
+      // Create the vertical lines using the plugin
       const lines = await this.trueVerticalLineService.createVerticalLines(
         this.chartService.chart,
+        this.chartService.candleSeries,
         times
       );
       console.log('Created TRUE vertical lines:', lines);

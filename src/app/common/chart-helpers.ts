@@ -2,6 +2,7 @@ import { EventEmitter } from '@angular/core';
 import {
   buildDLSeqMarkers,
   buildDMarkMarkers_TD13,
+  getTD9CompletionTimes,
 } from '../common/marker-helpers';
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
@@ -127,7 +128,9 @@ export function loadSymbolDataExternal(
       const swingBars = 3;
 
       chartService.chart.subscribeClick((param: any) => {
-        if (!param || !param.time) return;
+        if (!param || !param.time) {
+          return;
+        }
 
         const clickedTime = param.time;
         let isDLSeq9Showing = progressDLSeq9(
@@ -178,7 +181,7 @@ export function loadSymbolDataExternal(
         if (showSma5) chartService.addSmaLine(data, sma5Period, 'purple');
       }
 
-      // D-Mark markers
+      // D-Mark markers - clear all existing markers first
       const markers = buildDMarkMarkers_TD13(data);
       markers.sort((a: any, b: any) =>
         typeof a.time === 'number' && typeof b.time === 'number'
@@ -187,10 +190,12 @@ export function loadSymbolDataExternal(
             new Date(b.time as any).getTime()
       );
       if (chartService.candleSeries) {
-        createSeriesMarkers(
-          chartService.candleSeries,
-          showDMark ? markers : []
-        );
+        // Clear all existing markers (including DL Sequence markers)
+        clearChartMarkers(chartService.candleSeries);
+        // Then set D-Mark markers if enabled
+        if (showDMark) {
+          createSeriesMarkers(chartService.candleSeries, markers);
+        }
       }
 
       // const flipFlopMarkers = buildFlipFlopMarkers(data, swingBars);
@@ -245,7 +250,14 @@ export function progressDLSeq9(
   let specialAllNines: { time: string | number; value: number }[] = [];
 
   const clickedIndex = data.findIndex((d: any) => d.time === clickedTime);
-  if (clickedIndex === -1 || !showDlSeq9) return false;
+
+  if (clickedIndex === -1) {
+    return false;
+  }
+
+  if (!showDlSeq9) {
+    return false;
+  }
 
   if (isSwingLow(data, clickedIndex, swingBars)) {
     const { markers, specialNines } = buildDLSeqMarkers(
@@ -254,6 +266,9 @@ export function progressDLSeq9(
       'up'
     );
     if (chartService.candleSeries) {
+      // Clear all existing markers before adding DL Sequence markers
+      clearChartMarkers(chartService.candleSeries);
+      // Add only DL Sequence markers
       createSeriesMarkers(chartService.candleSeries, markers);
       isDLSeq9Showing = markers.length > 0;
       specialAllNines = specialNines;
@@ -265,10 +280,20 @@ export function progressDLSeq9(
       'down'
     );
     if (chartService.candleSeries) {
+      // Clear all existing markers before adding DL Sequence markers
+      clearChartMarkers(chartService.candleSeries);
+      // Add only DL Sequence markers
       createSeriesMarkers(chartService.candleSeries, markers);
       isDLSeq9Showing = markers.length > 0;
       specialAllNines = specialNines;
     }
+  } else {
+    // Clicked point is neither swing low nor swing high
+  }
+
+  // Only use DL Sequence "9"s - no TD9 fallback
+  if (specialAllNines.length === 0) {
+    return isDLSeq9Showing;
   }
 
   // Create TRUE vertical lines using the new service
@@ -281,13 +306,18 @@ export function progressDLSeq9(
       return ta - tb;
     });
 
-    console.log('🎯 Creating TRUE vertical lines for TD9 events:', uniqueTimes);
-    
+    // Clear any existing vertical lines before creating new ones
+    trueVerticalLineService.clearVerticalLines(chartService.candleSeries);
+
     // Use the TRUE vertical line service to create actual vertical lines
     trueVerticalLineService
-      .createVerticalLines(chartService.chart, uniqueTimes)
+      .createVerticalLines(
+        chartService.chart,
+        chartService.candleSeries,
+        uniqueTimes
+      )
       .then((lines) => {
-        console.log(`✅ Created ${lines.length} TRUE vertical lines!`);
+        // Lines created successfully
       })
       .catch((error) => {
         console.error('❌ Failed to create TRUE vertical lines:', error);
@@ -311,18 +341,18 @@ export function progressDLSeq9(
         uniqueTimes
       )
       .then((lines) => {
-        console.log(`✅ Created ${lines.length} vertical lines using plugin`);
+        // Lines created successfully
       })
       .catch((error) => {
         console.error('❌ Failed to create vertical lines with plugin:', error);
 
-        // Fallback: Create simple markers for vertical lines
+        // Fallback: Create simple markers for vertical lines with dashed pattern
         const verticalMarkers = uniqueTimes.map((time) => ({
           time: time,
           position: 'inBar' as const,
-          color: '#ff6b6b',
+          color: 'rgba(255, 255, 255, 0.9)', // White color to match other vertical lines
           shape: 'circle' as const,
-          text: '●',
+          text: '¦', // Use broken bar character to simulate dashed line
           size: 2,
         }));
 
@@ -331,12 +361,16 @@ export function progressDLSeq9(
           const existingMarkers: any[] = [];
           const allMarkers = [...existingMarkers, ...verticalMarkers];
           createSeriesMarkers(chartService.candleSeries, allMarkers);
-          console.log(
-            `📍 Created ${verticalMarkers.length} fallback vertical markers`
-          );
         }
       });
   }
 
   return isDLSeq9Showing;
+}
+
+// Utility function to clear all markers from a chart series
+export function clearChartMarkers(candleSeries: any) {
+  if (candleSeries) {
+    createSeriesMarkers(candleSeries, []);
+  }
 }

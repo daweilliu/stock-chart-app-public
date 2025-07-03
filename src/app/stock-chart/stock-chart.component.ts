@@ -96,8 +96,6 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
 
   ngAfterViewInit(): void {
     this.chartService.initChart(this.chartContainer.nativeElement);
-    // Set up the true vertical line service with the chart container
-    this.trueVerticalLineService.setChartContainer(this.chartContainer.nativeElement);
     this.loadSymbolData();
     this.resizeChart();
   }
@@ -110,6 +108,16 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
       this.chartService.initChart(this.chartContainer.nativeElement);
       this.loadSymbolData();
       this.resizeChart();
+    }
+
+    // Handle D-Mark setting changes
+    if (
+      changes['showDMark'] &&
+      this.chartContainer &&
+      this.chartService.chart
+    ) {
+      // Reload data to apply D-Mark marker changes and clear DL Sequence markers
+      this.loadSymbolData();
     }
   }
 
@@ -216,12 +224,23 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
   }
 
   deleteMarkers() {
-    if (this.chartService.candleSeries) {
-      createSeriesMarkers(this.chartService.candleSeries, []);
+    // Clear chart markers and restore D-Mark markers if they should be shown
+    if (this.showDMark) {
+      // Reload the symbol data to restore D-Mark markers
+      this.loadSymbolData();
+    } else {
+      // Just clear all markers
+      this.clearChartMarkers();
     }
     this.showDLSeq9 = false; // Hide the popup menu if needed
     this.startTime = null; // Reset start time
     this.deleteDLSeq9.emit(); // Notify parent
+  }
+
+  clearChartMarkers() {
+    if (this.chartService.candleSeries) {
+      createSeriesMarkers(this.chartService.candleSeries, []);
+    }
   }
 
   openMenu(event: MouseEvent, trigger: MatMenuTrigger) {
