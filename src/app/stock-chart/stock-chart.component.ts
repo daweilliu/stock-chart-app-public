@@ -240,22 +240,49 @@ export class StockChartComponent
   }
 
   deleteMarkers() {
+    if (this.isDestroyed) return;
+    
+    // Clear all chart markers (DL-Seq-9 markers)
+    this.clearChartMarkers();
+    
+    // Clear any vertical lines that might be associated with DL-Seq-9
+    this.clearVerticalLines();
+    
     // Clear chart markers and restore D-Mark markers if they should be shown
     if (this.showDMark) {
       // Reload the symbol data to restore D-Mark markers
       this.loadSymbolData();
-    } else {
-      // Just clear all markers
-      this.clearChartMarkers();
     }
+    
     this.showDLSeq9 = false; // Hide the popup menu if needed
     this.startTime = null; // Reset start time
-    this.deleteDLSeq9.emit(); // Notify parent
+    this.deleteDLSeq9.emit(); // Notify parent (this will handle backend deletion)
   }
 
   clearChartMarkers() {
     if (this.chartService.isChartValid() && this.chartService.candleSeries) {
-      createSeriesMarkers(this.chartService.candleSeries, []);
+      // Use the chart service's built-in clearMarkers method
+      this.chartService.clearMarkers();
+    }
+  }
+
+  clearVerticalLines() {
+    // Clear vertical lines using the services
+    if (this.trueVerticalLineService && this.chartService.isChartValid()) {
+      try {
+        this.trueVerticalLineService.clearVerticalLines(this.chartService.candleSeries);
+      } catch (error) {
+        console.warn('Error clearing true vertical lines:', error);
+      }
+    }
+    
+    if (this.verticalLineService && this.chartService.isChartValid()) {
+      try {
+        // Clear vertical lines from the regular vertical line service
+        this.verticalLineService.removeVerticalLines(this.chartService.chart);
+      } catch (error) {
+        console.warn('Error clearing vertical lines:', error);
+      }
     }
   }
 
