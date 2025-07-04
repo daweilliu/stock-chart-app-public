@@ -87,6 +87,13 @@ export function loadSymbolDataExternal(
         console.warn(`No data received for symbol: ${symbol} : ${res.message}`);
         return;
       }
+
+      // Check if chart is still valid before proceeding
+      if (!chartService.isChartValid()) {
+        console.warn('Chart is disposed, skipping data load');
+        return;
+      }
+
       const reversedValues = res.values.reverse();
       const data = reversedValues.map((bar: any) => ({
         time: bar.datetime.slice(0, 10),
@@ -106,8 +113,8 @@ export function loadSymbolDataExternal(
         });
       }
 
-      const minPrice = Math.min(...data.map((d: any) => d.low));
-      const maxPrice = Math.max(...data.map((d: any) => d.high));
+      // const minPrice = Math.min(...data.map((d: any) => d.low));
+      // const maxPrice = Math.max(...data.map((d: any) => d.high));
 
       // Remove the old histogram-based vertical line series
       // const verticalLineSeries = chartService.chart.addSeries(HistogramSeries, {
@@ -128,7 +135,7 @@ export function loadSymbolDataExternal(
       const swingBars = 3;
 
       chartService.chart.subscribeClick((param: any) => {
-        if (!param || !param.time) {
+        if (!param || !param.time || !chartService.isChartValid()) {
           return;
         }
 
@@ -151,6 +158,10 @@ export function loadSymbolDataExternal(
 
       if (chartService.candleSeries && chartService.chart) {
         chartService.chart.subscribeCrosshairMove((param: any) => {
+          if (!chartService.isChartValid()) {
+            return;
+          }
+
           if (param && param.seriesData && param.seriesData.size > 0) {
             const priceData = Array.from(param.seriesData.values())[0];
             const bar = priceData as {
@@ -181,20 +192,21 @@ export function loadSymbolDataExternal(
         if (showSma5) chartService.addSmaLine(data, sma5Period, 'purple');
       }
 
-      // D-Mark markers - clear all existing markers first
-      const markers = buildDMarkMarkers_TD13(data);
-      markers.sort((a: any, b: any) =>
-        typeof a.time === 'number' && typeof b.time === 'number'
-          ? a.time - b.time
-          : new Date(a.time as any).getTime() -
-            new Date(b.time as any).getTime()
-      );
-      if (chartService.candleSeries) {
-        // Clear all existing markers (including DL Sequence markers)
-        clearChartMarkers(chartService.candleSeries);
-        // Then set D-Mark markers if enabled
-        if (showDMark) {
-          createSeriesMarkers(chartService.candleSeries, markers);
+      // D-Mark markers - replace all existing markers
+      if (chartService.isChartValid()) {
+        const markers = buildDMarkMarkers_TD13(data);
+        markers.sort((a: any, b: any) =>
+          typeof a.time === 'number' && typeof b.time === 'number'
+            ? a.time - b.time
+            : new Date(a.time as any).getTime() -
+              new Date(b.time as any).getTime()
+        );
+        if (chartService.candleSeries) {
+          // Set D-Mark markers (or empty array to clear all markers)
+          createSeriesMarkers(
+            chartService.candleSeries,
+            showDMark ? markers : []
+          );
         }
       }
 
@@ -244,20 +256,29 @@ export function progressDLSeq9(
   verticalLineService?: VerticalLinePluginService,
   trueVerticalLineService?: TrueVerticalLineService
 ): boolean {
+  // 🚦 Early exit if core chart/series/marker plugin do not exist OR if chart is disposed
+  if (
+    !chartService.chart ||
+    !chartService.candleSeries ||
+    !chartService.markersApi ||
+    !chartService.isChartValid()
+  ) {
+    return false;
+  }
+
   let isDLSeq9Showing = false;
-  const minPrice = Math.min(...data.map((d) => d.low));
-  const maxPrice = Math.max(...data.map((d) => d.high));
   let specialAllNines: { time: string | number; value: number }[] = [];
 
   const clickedIndex = data.findIndex((d: any) => d.time === clickedTime);
 
-  if (clickedIndex === -1) {
+  if (clickedIndex === -1 || !showDlSeq9) {
+    // If no valid click or should not show, clear markers and exit
+    chartService.clearMarkers && chartService.clearMarkers();
     return false;
   }
 
-  if (!showDlSeq9) {
-    return false;
-  }
+  // Default: clear all markers first
+  chartService.clearMarkers && chartService.clearMarkers();
 
   if (isSwingLow(data, clickedIndex, swingBars)) {
     const { markers, specialNines } = buildDLSeqMarkers(
@@ -265,30 +286,24 @@ export function progressDLSeq9(
       clickedIndex,
       'up'
     );
-    if (chartService.candleSeries) {
-      // Clear all existing markers before adding DL Sequence markers
-      clearChartMarkers(chartService.candleSeries);
-      // Add only DL Sequence markers
-      createSeriesMarkers(chartService.candleSeries, markers);
-      isDLSeq9Showing = markers.length > 0;
-      specialAllNines = specialNines;
+    if (chartService.isChartValid()) {
+      chartService.setMarkers && chartService.setMarkers(markers);
     }
+    isDLSeq9Showing = markers.length > 0;
+    specialAllNines = specialNines;
   } else if (isSwingHigh(data, clickedIndex, swingBars)) {
     const { markers, specialNines } = buildDLSeqMarkers(
       data,
       clickedIndex,
       'down'
     );
-    if (chartService.candleSeries) {
-      // Clear all existing markers before adding DL Sequence markers
-      clearChartMarkers(chartService.candleSeries);
-      // Add only DL Sequence markers
-      createSeriesMarkers(chartService.candleSeries, markers);
-      isDLSeq9Showing = markers.length > 0;
-      specialAllNines = specialNines;
+    if (chartService.isChartValid()) {
+      chartService.setMarkers && chartService.setMarkers(markers);
     }
+    isDLSeq9Showing = markers.length > 0;
+    specialAllNines = specialNines;
   } else {
-    // Clicked point is neither swing low nor swing high
+    // Not a swing: markers already cleared above
   }
 
   // Only use DL Sequence "9"s - no TD9 fallback
@@ -297,71 +312,47 @@ export function progressDLSeq9(
   }
 
   // Create TRUE vertical lines using the new service
-  if (trueVerticalLineService && specialAllNines.length > 0) {
-    const uniqueTimes = Array.from(
-      new Set(specialAllNines.map((nine) => nine.time))
-    ).sort((a, b) => {
-      const ta = typeof a === 'string' ? Date.parse(a) : Number(a);
-      const tb = typeof b === 'string' ? Date.parse(b) : Number(b);
-      return ta - tb;
-    });
+  const uniqueTimes = Array.from(
+    new Set(specialAllNines.map((nine) => nine.time))
+  ).sort((a, b) => {
+    const ta = typeof a === 'string' ? Date.parse(a) : Number(a);
+    const tb = typeof b === 'string' ? Date.parse(b) : Number(b);
+    return ta - tb;
+  });
 
-    // Clear any existing vertical lines before creating new ones
+  if (
+    trueVerticalLineService &&
+    typeof trueVerticalLineService.clearVerticalLines === 'function' &&
+    typeof trueVerticalLineService.createVerticalLines === 'function'
+  ) {
     trueVerticalLineService.clearVerticalLines(chartService.candleSeries);
-
-    // Use the TRUE vertical line service to create actual vertical lines
     trueVerticalLineService
       .createVerticalLines(
         chartService.chart,
         chartService.candleSeries,
         uniqueTimes
       )
-      .then((lines) => {
-        // Lines created successfully
+      .then(() => {
+        /* lines created */
       })
       .catch((error) => {
         console.error('❌ Failed to create TRUE vertical lines:', error);
       });
-  }
-  // Fallback to plugin-based approach if true vertical lines fail
-  else if (verticalLineService && specialAllNines.length > 0) {
-    const uniqueTimes = Array.from(
-      new Set(specialAllNines.map((nine) => nine.time))
-    ).sort((a, b) => {
-      const ta = typeof a === 'string' ? Date.parse(a) : Number(a);
-      const tb = typeof b === 'string' ? Date.parse(b) : Number(b);
-      return ta - tb;
-    });
-
-    // Use the vertical line plugin to create beautiful vertical lines
+  } else if (
+    verticalLineService &&
+    typeof verticalLineService.createVerticalLines === 'function'
+  ) {
     verticalLineService
       .createVerticalLines(
         chartService.chart,
         chartService.candleSeries,
         uniqueTimes
       )
-      .then((lines) => {
-        // Lines created successfully
+      .then(() => {
+        /* lines created */
       })
       .catch((error) => {
         console.error('❌ Failed to create vertical lines with plugin:', error);
-
-        // Fallback: Create simple markers for vertical lines with dashed pattern
-        const verticalMarkers = uniqueTimes.map((time) => ({
-          time: time,
-          position: 'inBar' as const,
-          color: 'rgba(255, 255, 255, 0.9)', // White color to match other vertical lines
-          shape: 'circle' as const,
-          text: '¦', // Use broken bar character to simulate dashed line
-          size: 2,
-        }));
-
-        // Add fallback markers to existing markers
-        if (chartService.candleSeries) {
-          const existingMarkers: any[] = [];
-          const allMarkers = [...existingMarkers, ...verticalMarkers];
-          createSeriesMarkers(chartService.candleSeries, allMarkers);
-        }
       });
   }
 
@@ -371,6 +362,10 @@ export function progressDLSeq9(
 // Utility function to clear all markers from a chart series
 export function clearChartMarkers(candleSeries: any) {
   if (candleSeries) {
-    createSeriesMarkers(candleSeries, []);
+    try {
+      createSeriesMarkers(candleSeries, []);
+    } catch (error) {
+      console.warn('Error clearing chart markers:', error);
+    }
   }
 }

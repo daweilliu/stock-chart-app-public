@@ -7,6 +7,8 @@ import {
   CandlestickSeries,
   HistogramSeries,
   LineSeries,
+  createSeriesMarkers,
+  ISeriesMarkersPluginApi,
 } from 'lightweight-charts';
 
 @Injectable({ providedIn: 'root' })
@@ -15,8 +17,16 @@ export class StockChartService {
   candleSeries: any;
   volumeSeries: any;
   private currentVerticalLines: any[] = []; // Track current vertical lines
+  private isDisposed = false; // Flag to track if chart is disposed
+
+  // ---- NEW: Generic Markers API handle ----
+  markersApi?: ISeriesMarkersPluginApi<any>;
 
   initChart(container: HTMLElement): IChartApi {
+    // Clean up any existing chart first
+    this.destroyChart();
+
+    this.isDisposed = false;
     this.chart = createChart(container, {
       width: container.offsetWidth,
       height: container.offsetHeight,
@@ -31,7 +41,6 @@ export class StockChartService {
     });
 
     this.candleSeries = this.chart.addSeries(CandlestickSeries, {
-      // options for the candlestick series
       priceScaleId: 'left',
       upColor: '#00ff00',
       downColor: '#ff0000',
@@ -50,18 +59,48 @@ export class StockChartService {
     this.volumeSeries.priceScale().applyOptions({
       scaleMargins: { top: 0.85, bottom: 0 },
     });
+
+    // ---- NEW: Initialize the marker plugin ONCE here ----
+    this.initMarkersPlugin();
+
     return this.chart;
   }
 
+  // ---- NEW: Initialize Markers Plugin ONCE after series is created ----
+  initMarkersPlugin() {
+    if (!this.markersApi && this.candleSeries && !this.isDisposed) {
+      this.markersApi = createSeriesMarkers(this.candleSeries, []);
+    }
+  }
+
+  // ---- NEW: Set or clear markers ----
+  setMarkers(markers: any[]) {
+    if (this.markersApi && !this.isDisposed) {
+      this.markersApi.setMarkers(markers);
+    }
+  }
+
+  clearMarkers() {
+    if (!this.isDisposed) {
+      this.setMarkers([]);
+    }
+  }
+
   setCandleData(data: CandlestickData[]) {
-    this.candleSeries.setData(data);
+    if (this.candleSeries && !this.isDisposed) {
+      this.candleSeries.setData(data);
+    }
   }
 
   setVolumeData(volumeData: any[]) {
-    this.volumeSeries.setData(volumeData);
+    if (this.volumeSeries && !this.isDisposed) {
+      this.volumeSeries.setData(volumeData);
+    }
   }
 
   addSmaLine(data: CandlestickData[], period: number, color: string) {
+    if (this.isDisposed || !this.chart) return null;
+
     const smaData = this.calculateSMA(data, period);
 
     const smaSeries = this.chart.addSeries(LineSeries, {
@@ -85,18 +124,35 @@ export class StockChartService {
 
   // Vertical line management methods
   addVerticalLines(verticalLines: any[]) {
-    // This method is now handled by VerticalLinePluginService
-    // Keep for backward compatibility
     this.currentVerticalLines = verticalLines;
   }
 
   clearVerticalLines() {
-    // This method is now handled by VerticalLinePluginService
-    // Keep for backward compatibility
     this.currentVerticalLines = [];
   }
 
   getCurrentVerticalLines() {
     return this.currentVerticalLines;
+  }
+
+  isChartValid(): boolean {
+    return !this.isDisposed && !!this.chart;
+  }
+
+  destroyChart() {
+    if (this.chart && !this.isDisposed) {
+      try {
+        this.chart.remove();
+      } catch (error) {
+        console.warn('Error removing chart:', error);
+      }
+    }
+
+    this.isDisposed = true;
+    this.chart = undefined!;
+    this.candleSeries = undefined!;
+    this.volumeSeries = undefined!;
+    this.markersApi = undefined;
+    this.currentVerticalLines = [];
   }
 }

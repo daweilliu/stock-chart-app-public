@@ -9,6 +9,7 @@ import {
   Output,
   EventEmitter,
   OnInit,
+  OnDestroy,
   HostListener,
 } from '@angular/core';
 import { StockChartService } from '../services/stock-chart.service';
@@ -32,7 +33,9 @@ import { createSeriesMarkers } from 'lightweight-charts';
   standalone: true,
   imports: [CommonModule, MatMenuModule],
 })
-export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
+export class StockChartComponent
+  implements AfterViewInit, OnChanges, OnInit, OnDestroy
+{
   @Input() symbol: string = 'AAPL';
   @Input() range: 'ytd' | '1y' | '2y' | '5y' | '10y' | 'max' = '10y';
   @Input() timeframe: 'daily' | 'weekly' | 'monthly' = 'daily';
@@ -84,6 +87,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
   chartMenuPosition = { x: 0, y: 0 };
   showDLSeq9 = false; // Control visibility of DLSeq9
   startTime: string | number | null = null;
+  private isDestroyed = false; // Flag to track if component is destroyed
 
   constructor(
     private chartService: StockChartService,
@@ -95,12 +99,17 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
   }
 
   ngAfterViewInit(): void {
+    if (this.isDestroyed) return;
+
+    this.chartService.destroyChart();
     this.chartService.initChart(this.chartContainer.nativeElement);
     this.loadSymbolData();
     this.resizeChart();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (this.isDestroyed) return;
+
     if (changes['timeframe'] && this.chartContainer) {
       if (this.chartService.chart) {
         this.chartService.chart.remove();
@@ -160,6 +169,8 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
   }
 
   onWatchlistSelect(symbol: string) {
+    if (this.isDestroyed) return;
+
     if (this.chartService.chart) {
       this.chartService.chart.remove();
     }
@@ -169,6 +180,8 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
   }
 
   reload() {
+    if (this.isDestroyed) return;
+
     if (this.chartService.chart) {
       this.chartService.chart.remove();
     }
@@ -178,15 +191,18 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
   }
 
   resizeChart() {
-    if (this.chartService.chart && this.chartContainer) {
-      const width = this.chartContainer.nativeElement.offsetWidth;
-      const height = this.chartContainer.nativeElement.offsetHeight;
-      this.chartService.chart.resize(width, height);
-    }
+    if (this.isDestroyed || !this.chartService.chart || !this.chartContainer)
+      return;
+
+    const width = this.chartContainer.nativeElement.offsetWidth;
+    const height = this.chartContainer.nativeElement.offsetHeight;
+    this.chartService.chart.resize(width, height);
   }
 
   // Update SMAs from settings panel
   updateSmas(smas: any[]) {
+    if (this.isDestroyed) return;
+
     this.showSma1 = !!smas[0]?.enabled;
     this.sma1Period = smas[0]?.value ?? 5;
     this.showSma2 = !!smas[1]?.enabled;
@@ -238,7 +254,7 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
   }
 
   clearChartMarkers() {
-    if (this.chartService.candleSeries) {
+    if (this.chartService.isChartValid() && this.chartService.candleSeries) {
       createSeriesMarkers(this.chartService.candleSeries, []);
     }
   }
@@ -248,5 +264,17 @@ export class StockChartComponent implements AfterViewInit, OnChanges, OnInit {
     // Set menu position
     (trigger as any)._setMenuPosition({ x: event.clientX, y: event.clientY });
     trigger.openMenu();
+  }
+
+  ngOnDestroy() {
+    this.isDestroyed = true;
+    this.chartService.destroyChart();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    if (!this.isDestroyed) {
+      this.resizeChart();
+    }
   }
 }
