@@ -14,7 +14,6 @@ import {
 } from '@angular/core';
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
-import { VerticalLinePluginService } from '../services/vertical-line-plugin.service';
 import { TrueVerticalLineService } from '../services/true-vertical-line.service';
 import { CommonModule } from '@angular/common';
 import {
@@ -92,7 +91,6 @@ export class StockChartComponent
   constructor(
     private chartService: StockChartService,
     private dataService: StockDataService,
-    private verticalLineService: VerticalLinePluginService,
     private trueVerticalLineService: TrueVerticalLineService
   ) {
     this.showDLSeq9 = false;
@@ -163,7 +161,6 @@ export class StockChartComponent
       this.latestBar,
       this.barClicked,
       this.dlSeq9Click, // Pass the EventEmitter for DLSeq9 click info
-      this.verticalLineService, // Add the vertical line service
       this.trueVerticalLineService // Add the TRUE vertical line service
     );
   }
@@ -241,19 +238,19 @@ export class StockChartComponent
 
   deleteMarkers() {
     if (this.isDestroyed) return;
-    
+
     // Clear all chart markers (DL-Seq-9 markers)
     this.clearChartMarkers();
-    
+
     // Clear any vertical lines that might be associated with DL-Seq-9
     this.clearVerticalLines();
-    
+
     // Clear chart markers and restore D-Mark markers if they should be shown
     if (this.showDMark) {
       // Reload the symbol data to restore D-Mark markers
       this.loadSymbolData();
     }
-    
+
     this.showDLSeq9 = false; // Hide the popup menu if needed
     this.startTime = null; // Reset start time
     this.deleteDLSeq9.emit(); // Notify parent (this will handle backend deletion)
@@ -270,18 +267,11 @@ export class StockChartComponent
     // Clear vertical lines using the services
     if (this.trueVerticalLineService && this.chartService.isChartValid()) {
       try {
-        this.trueVerticalLineService.clearVerticalLines(this.chartService.candleSeries);
+        this.trueVerticalLineService.clearVerticalLines(
+          this.chartService.candleSeries
+        );
       } catch (error) {
         console.warn('Error clearing true vertical lines:', error);
-      }
-    }
-    
-    if (this.verticalLineService && this.chartService.isChartValid()) {
-      try {
-        // Clear vertical lines from the regular vertical line service
-        this.verticalLineService.removeVerticalLines(this.chartService.chart);
-      } catch (error) {
-        console.warn('Error clearing vertical lines:', error);
       }
     }
   }

@@ -6,7 +6,6 @@ import {
 } from '../common/marker-helpers';
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
-import { VerticalLinePluginService } from '../services/vertical-line-plugin.service';
 import { TrueVerticalLineService } from '../services/true-vertical-line.service';
 import {
   CandlestickData,
@@ -74,7 +73,6 @@ export function loadSymbolDataExternal(
   latestBar: EventEmitter<any>,
   barClicked: EventEmitter<any>,
   dlSeq9Click?: EventEmitter<{ time: string | number; isShowing: boolean }>,
-  verticalLineService?: VerticalLinePluginService,
   trueVerticalLineService?: TrueVerticalLineService
 ) {
   const outputsize = getOutputSize(range);
@@ -146,7 +144,6 @@ export function loadSymbolDataExternal(
           showDlSeq9,
           chartService,
           swingBars,
-          verticalLineService,
           trueVerticalLineService
         );
 
@@ -253,7 +250,6 @@ export function progressDLSeq9(
   showDlSeq9: boolean,
   chartService: StockChartService,
   swingBars: number,
-  verticalLineService?: VerticalLinePluginService,
   trueVerticalLineService?: TrueVerticalLineService
 ): boolean {
   // 🚦 Early exit if core chart/series/marker plugin do not exist OR if chart is disposed
@@ -335,24 +331,8 @@ export function progressDLSeq9(
       .then(() => {
         /* lines created */
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.error('❌ Failed to create TRUE vertical lines:', error);
-      });
-  } else if (
-    verticalLineService &&
-    typeof verticalLineService.createVerticalLines === 'function'
-  ) {
-    verticalLineService
-      .createVerticalLines(
-        chartService.chart,
-        chartService.candleSeries,
-        uniqueTimes
-      )
-      .then(() => {
-        /* lines created */
-      })
-      .catch((error) => {
-        console.error('❌ Failed to create vertical lines with plugin:', error);
       });
   }
 

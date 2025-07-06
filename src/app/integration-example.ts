@@ -2,22 +2,19 @@
 // Example of how to update your stock chart component
 // Add this to your stock-chart.component.ts
 
-import { VerticalLinePluginService } from '../services/vertical-line-plugin.service';
 import { TrueVerticalLineService } from '../services/true-vertical-line.service';
 
-// In your constructor, inject both services:
+// In your constructor, inject the service:
 constructor(
   private chartService: StockChartService,
   private dataService: StockDataService,
-  private verticalLineService: VerticalLinePluginService,
   private trueVerticalLineService: TrueVerticalLineService
 ) {}
 
-// When calling loadSymbolDataExternal, pass both services:
+// When calling loadSymbolDataExternal, pass the service:
 loadSymbolDataExternal(
   // ... other parameters
-  this.verticalLineService, // <- Plugin-based fallback
-  this.trueVerticalLineService // <- TRUE vertical lines (HTML overlay)
+  this.trueVerticalLineService // <- TRUE vertical lines
 );
 
 // You can also manually create TRUE vertical lines:

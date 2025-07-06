@@ -18,10 +18,10 @@ export class TrueVerticalLineService {
     const newLines: VertLine[] = [];
 
     times.forEach((time, index) => {
-      // Create vertical line using the plugin
+      // Create vertical line using the plugin with thin, distinct styling
       const verticalLine = new VertLine(chart, series, time as any, {
-        color: 'rgba(255, 255, 255, 0.9)',
-        width: 2,
+        color: 'rgba(255, 140, 0, 0.8)', // Dark orange - distinct from blue markers
+        width: 1, // Thin line for elegant appearance
         lineStyle: 'dashed',
         showLabel: false,
       });
