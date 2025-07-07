@@ -309,8 +309,8 @@ export function progressDLSeq9(
     // Not a swing: markers already cleared above
   }
 
-  // Only use DL Sequence "9"s - no TD9 fallback
-  // Clear existing vertical lines first, regardless of the count
+  // Only use DL Sequence "9"s - show vertical lines for special 9s
+  // Clear existing vertical lines first
   if (
     trueVerticalLineService &&
     typeof trueVerticalLineService.clearVerticalLines === 'function'
@@ -318,11 +318,9 @@ export function progressDLSeq9(
     trueVerticalLineService.clearVerticalLines(chartService.candleSeries);
   }
 
-  // Only show vertical lines if there are 3 or more "9s"
-  if (specialAllNines.length < 3) {
-    console.log(
-      `Only ${specialAllNines.length} 9s found, need at least 3 for vertical lines`
-    );
+  // Show vertical lines if there are any special "9s" (3rd, 6th, 9th, etc.)
+  if (specialAllNines.length === 0) {
+    console.log('No special 9s found, no vertical lines needed');
     return isDLSeq9Showing;
   }
 
@@ -347,7 +345,7 @@ export function progressDLSeq9(
       )
       .then(() => {
         console.log(
-          `✅ Created ${uniqueTimes.length} vertical lines for ${specialAllNines.length} 9s`
+          `✅ Created ${uniqueTimes.length} vertical lines for ${specialAllNines.length} special 9s`
         );
       })
       .catch((error: any) => {
