@@ -32,6 +32,8 @@
     <as-split-area [size]="showPanel || showWatchlist ? 85 : 100" minSize="300">
       <div class="chart-area">
         <div class="chart-container">
+          <!-- Debug buttons for testing -->
+
           <app-stock-chart
             [symbol]="symbol"
             [range]="range"
@@ -50,10 +52,11 @@
             [sma4Period]="smas[3]?.value ?? 120"
             [showSma5]="showSma && (smas[4]?.enabled ?? false)"
             [sma5Period]="smas[4]?.value ?? 240"
+            [savedStartTime]="startTime"
             (latestBar)="onLatestBar($event)"
             (barClicked)="onLatestBar($event)"
             (dlSeq9Click)="onDlSeq9Click($event)"
-            (saveDLSeq9)="saveDLSeq9()"
+            (saveDLSeq9)="saveDLSeq9($event)"
             (deleteDLSeq9)="onDeleteDLSeq9()"
           ></app-stock-chart>
         </div>

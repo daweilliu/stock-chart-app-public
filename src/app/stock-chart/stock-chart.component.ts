@@ -58,6 +58,7 @@ export class StockChartComponent
   @Input() showSma4: boolean = false;
   @Input() sma5Period: number = 240;
   @Input() showSma5: boolean = false;
+  @Input() savedStartTime: string | number | null = null; // Input for saved start time
 
   @Output() latestBar = new EventEmitter<{
     open: number;
@@ -126,14 +127,22 @@ export class StockChartComponent
       // Reload data to apply D-Mark marker changes and clear DL Sequence markers
       this.loadSymbolData();
     }
+
+    // Handle savedStartTime changes for auto-display
+    if (
+      changes['savedStartTime'] &&
+      this.chartContainer &&
+      this.chartService.chart
+    ) {
+      this.loadSymbolData();
+    }
   }
 
   ngOnInit() {
     this.dlSeq9Click.subscribe(({ time, isShowing }) => {
       // Use time and isShowing here
       this.showDLSeq9 = isShowing; // Update local state if needed
-      this.startTime;
-      console.log('DLSeq9:', time, isShowing);
+      this.startTime = time; // Set the start time for saving
     });
   }
 
@@ -161,7 +170,8 @@ export class StockChartComponent
       this.latestBar,
       this.barClicked,
       this.dlSeq9Click, // Pass the EventEmitter for DLSeq9 click info
-      this.trueVerticalLineService // Add the TRUE vertical line service
+      this.trueVerticalLineService, // Add the TRUE vertical line service
+      this.savedStartTime ? String(this.savedStartTime) : undefined // Use savedStartTime for auto-display
     );
   }
 
@@ -233,7 +243,17 @@ export class StockChartComponent
   }
 
   onSaveDLSeq9() {
-    this.saveDLSeq9.emit(this.startTime !== null ? this.startTime : undefined);
+    const timeToSave =
+      this.startTime !== null ? this.startTime : this.savedStartTime;
+
+    if (timeToSave !== null && timeToSave !== undefined) {
+      this.saveDLSeq9.emit(timeToSave);
+    } else {
+      console.warn('❌ No start time available to save DL-Seq-9');
+      console.warn(
+        '💡 Try clicking on a swing high/low first to create a DL-Seq-9 sequence'
+      );
+    }
   }
 
   deleteMarkers() {
@@ -281,6 +301,42 @@ export class StockChartComponent
     // Set menu position
     (trigger as any)._setMenuPosition({ x: event.clientX, y: event.clientY });
     trigger.openMenu();
+  }
+
+  displayDLSeq9ForTime(startTime: string) {
+    // This method displays DL-Seq-9 sequence for a saved start time
+    if (!this.chartService.isChartValid() || this.isDestroyed) return;
+
+    // We need to find the bar data for the given start time and simulate a click
+    // First, let's load the symbol data and then trigger the DL-Seq-9 display
+    setTimeout(() => {
+      this.triggerDLSeq9Display(startTime);
+    }, 500); // Give time for chart data to load
+  }
+
+  clearDLSeq9Display() {
+    // Clear any displayed DL-Seq-9 markers and vertical lines
+    if (!this.isDestroyed) {
+      this.clearChartMarkers();
+      this.clearVerticalLines();
+      this.showDLSeq9 = false;
+      this.startTime = null;
+    }
+  }
+
+  private triggerDLSeq9Display(startTime: string) {
+    // This method simulates a chart click to trigger DL-Seq-9 display
+    if (!this.chartService.isChartValid() || this.isDestroyed) return;
+
+    try {
+      // Get the chart's time scale to find the appropriate time
+      const timeScale = this.chartService.chart.timeScale();
+
+      // For now, let's reload the symbol data which will check for saved DL-Seq-9
+      this.loadSymbolData();
+    } catch (error) {
+      console.warn('Error displaying saved DL-Seq-9:', error);
+    }
   }
 
   ngOnDestroy() {

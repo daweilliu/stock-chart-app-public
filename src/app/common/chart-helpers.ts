@@ -73,7 +73,8 @@ export function loadSymbolDataExternal(
   latestBar: EventEmitter<any>,
   barClicked: EventEmitter<any>,
   dlSeq9Click?: EventEmitter<{ time: string | number; isShowing: boolean }>,
-  trueVerticalLineService?: TrueVerticalLineService
+  trueVerticalLineService?: TrueVerticalLineService,
+  savedDLSeq9StartTime?: string
 ) {
   const outputsize = getOutputSize(range);
   const interval = getInterval(timeframe);
@@ -93,13 +94,50 @@ export function loadSymbolDataExternal(
       }
 
       const reversedValues = res.values.reverse();
-      const data = reversedValues.map((bar: any) => ({
-        time: bar.datetime.slice(0, 10),
+
+      // Create data array with proper time handling
+      const rawData = reversedValues.map((bar: any) => ({
+        time: bar.datetime, // Keep full datetime for proper sorting
         open: parseFloat(bar.open),
         high: parseFloat(bar.high),
         low: parseFloat(bar.low),
         close: parseFloat(bar.close),
       }));
+
+      // Sort by time to ensure ascending order
+      rawData.sort(
+        (a: any, b: any) =>
+          new Date(a.time).getTime() - new Date(b.time).getTime()
+      );
+
+      // Remove duplicates and format time for lightweight-charts
+      const uniqueDataMap = new Map();
+      rawData.forEach((bar: any) => {
+        const timeKey = bar.time.slice(0, 10); // Use date as key for deduplication
+        if (!uniqueDataMap.has(timeKey)) {
+          uniqueDataMap.set(timeKey, {
+            time: timeKey, // Use date format for lightweight-charts
+            open: bar.open,
+            high: bar.high,
+            low: bar.low,
+            close: bar.close,
+          });
+        }
+      });
+
+      const data = Array.from(uniqueDataMap.values());
+
+      // Final sort by time to ensure proper order
+      data.sort(
+        (a: any, b: any) =>
+          new Date(a.time).getTime() - new Date(b.time).getTime()
+      );
+
+      // Verify no duplicate timestamps (keep this as it's important for debugging data issues)
+      const timeSet = new Set(data.map((d: any) => d.time));
+      if (timeSet.size !== data.length) {
+        console.error('❌ Duplicate timestamps detected in chart data!');
+      }
 
       if (data.length > 0) {
         const lastBar = data[data.length - 1];
@@ -205,6 +243,23 @@ export function loadSymbolDataExternal(
             showDMark ? markers : []
           );
         }
+      }
+
+      // Auto-display saved DL-Seq-9 if provided and DL-Seq-9 is enabled
+      if (
+        showDlSeq9 &&
+        savedDLSeq9StartTime &&
+        savedDLSeq9StartTime !== '00:00:00'
+      ) {
+        setTimeout(() => {
+          autoDisplaySavedDLSeq9(
+            data,
+            savedDLSeq9StartTime,
+            chartService,
+            trueVerticalLineService,
+            dlSeq9Click
+          );
+        }, 500); // Give time for chart to fully render
       }
 
       // const flipFlopMarkers = buildFlipFlopMarkers(data, swingBars);
@@ -364,5 +419,61 @@ export function clearChartMarkers(candleSeries: any) {
     } catch (error) {
       console.warn('Error clearing chart markers:', error);
     }
+  }
+}
+
+// Auto-display saved DL-Seq-9 sequence
+function autoDisplaySavedDLSeq9(
+  data: any[],
+  savedStartTime: string,
+  chartService: StockChartService,
+  trueVerticalLineService?: TrueVerticalLineService,
+  dlSeq9Click?: EventEmitter<{ time: string | number; isShowing: boolean }>
+) {
+  if (!chartService.isChartValid()) {
+    console.warn('❌ Chart is not valid, cannot auto-display DL-Seq-9');
+    return;
+  }
+
+  // Find the closest data point to the saved start time
+  const targetTime = savedStartTime;
+  let closestIndex = -1;
+  let closestTimeDiff = Infinity;
+
+  for (let i = 0; i < data.length; i++) {
+    const dataTimeStr = data[i].time;
+    const timeDiff = Math.abs(
+      new Date(dataTimeStr).getTime() - new Date(targetTime).getTime()
+    );
+
+    if (timeDiff < closestTimeDiff) {
+      closestTimeDiff = timeDiff;
+      closestIndex = i;
+    }
+  }
+
+  if (closestIndex !== -1) {
+    const clickedTime = data[closestIndex].time;
+
+    // Trigger the DL-Seq-9 display logic
+    const swingBars = 3;
+    let isDLSeq9Showing = progressDLSeq9(
+      data,
+      clickedTime,
+      true, // showDlSeq9 is true
+      chartService,
+      swingBars,
+      trueVerticalLineService
+    );
+
+    // Emit the event if DL-Seq-9 is showing
+    if (dlSeq9Click && isDLSeq9Showing) {
+      dlSeq9Click.emit({ time: clickedTime, isShowing: isDLSeq9Showing });
+    }
+  } else {
+    console.warn(
+      '❌ Could not find matching data point for saved start time:',
+      savedStartTime
+    );
   }
 }

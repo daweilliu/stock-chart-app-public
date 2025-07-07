@@ -34,7 +34,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('mySplit') mySplit!: SplitComponent;
 
   // Symbol and range
-  symbol = '';
+  symbol = 'AAPL'; // Default symbol
   range: '1y' | '5y' | 'max' | 'ytd' | '2y' | '10y' = 'max';
   timeframe: 'daily' | 'weekly' | 'monthly' = 'daily';
   showWatchlist = false;
@@ -85,12 +85,19 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.fetchFullName(this.symbol);
     this.onSettingsApply();
     this.loadWatchlist();
+    // Load DL-Seq-9 data for the initial symbol
+    this.loadDLSeq9();
   }
 
   ngAfterViewInit() {
     this.sub = this.mySplit.dragProgress$.subscribe((event) => {
       this.resizeChart();
     });
+
+    // Load DL-Seq-9 data after the chart component is initialized
+    setTimeout(() => {
+      this.loadDLSeq9();
+    }, 500);
   }
 
   saveWatchlist() {
@@ -142,6 +149,13 @@ export class AppComponent implements OnInit, AfterViewInit {
             layout.showVolumeOverlap ?? this.showVolumeOverlap;
           this.showSma = layout.showSma ?? this.showSma;
           this.showDlSeq9 = layout.showDlSeq9 ?? this.showDlSeq9;
+
+          // If DL-Seq-9 is enabled in the layout, load and display it
+          if (this.showDlSeq9) {
+            setTimeout(() => {
+              this.loadDLSeq9();
+            }, 200);
+          }
         }
       },
       error: (err) => {
@@ -172,17 +186,49 @@ export class AppComponent implements OnInit, AfterViewInit {
       });
   }
 
-  saveDLSeq9() {
+  saveDLSeq9(timeToSave?: string | number) {
+    // If timeToSave is provided, use it; otherwise use the component's startTime
+    const actualStartTime = timeToSave || this.startTime;
+
+    if (!actualStartTime) {
+      console.warn('❌ No start time available to save DL-Seq-9');
+      return;
+    }
+
+    if (!this.symbol) {
+      console.error('Cannot save DL-Seq-9: No symbol selected');
+      return;
+    }
+
+    if (!actualStartTime || actualStartTime === '00:00:00') {
+      console.error('Cannot save DL-Seq-9: No valid start time set');
+      return;
+    }
+
+    // Update the component's startTime
+    this.startTime = actualStartTime as string;
+
     this.instrumentSettingService
       .saveSetting({
         userId: this.userId,
         layout: this.layoutName,
         symbol: this.symbol,
         settingType: 'dlSeq9',
-        value: { startTime: this.startTime },
+        value: { startTime: actualStartTime },
       })
-      .subscribe((res) => {
-        // handle success, maybe notify StockChartComponent
+      .subscribe({
+        next: (res) => {
+          // console.log('DL-Seq-9 saved successfully:', actualStartTime, res);
+          // If Show DL-Seq-9 is enabled, display it immediately after saving
+          if (this.showDlSeq9 && this.chartComponent) {
+            setTimeout(() => {
+              this.displaySavedDLSeq9(actualStartTime as string);
+            }, 100);
+          }
+        },
+        error: (err) => {
+          console.error('Error saving DL-Seq-9:', err);
+        },
       });
   }
 
@@ -191,8 +237,13 @@ export class AppComponent implements OnInit, AfterViewInit {
       .getSetting(this.userId, this.layoutName, this.symbol, 'dlSeq9')
       .subscribe((value) => {
         this.startTime = value.startTime || '00:00:00'; // Default to 00:00:00 if not set
-        // value is { startTime: ... } or {} if not set
-        // pass to StockChartComponent if needed
+        // If Show DL-Seq-9 is enabled and we have a saved start time, display it on the chart
+        if (this.showDlSeq9 && value.startTime && this.chartComponent) {
+          // Add a small delay to ensure chart is loaded
+          setTimeout(() => {
+            this.displaySavedDLSeq9(value.startTime);
+          }, 100);
+        }
       });
   }
 
@@ -200,8 +251,24 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.instrumentSettingService
       .deleteSetting(this.userId, this.layoutName, this.symbol, 'dlSeq9')
       .subscribe((res) => {
-        // handle success, maybe notify StockChartComponent
+        // console.log('DL-Seq-9 deleted successfully');
+        // Clear the display and reset start time
+        this.startTime = '00:00:00';
+        if (this.chartComponent) {
+          this.chartComponent.clearDLSeq9Display();
+        }
       });
+  }
+
+  displaySavedDLSeq9(startTime: string) {
+    // This method will trigger the display of saved DL-Seq-9 on the chart
+    if (this.chartComponent) {
+      // We need to simulate a click on the chart at the saved start time
+      // This will trigger the DL-Seq-9 sequence to be displayed
+      this.chartComponent.displayDLSeq9ForTime(startTime);
+    } else {
+      console.warn('Chart component is not available');
+    }
   }
 
   addToWatchlist(symbol: string) {
@@ -229,8 +296,9 @@ export class AppComponent implements OnInit, AfterViewInit {
         if (this.chartComponent && this.chartComponent.resizeChart) {
           this.chartComponent.resizeChart();
         }
-      }, 0);
-      this.loadDLSeq9();
+        // Load DL-Seq-9 data for the new symbol after chart is resized
+        this.loadDLSeq9();
+      }, 100);
     }
   }
 
@@ -304,6 +372,10 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.chartComponent.onWatchlistSelect(symbol);
       this.resizeChart();
       this.fetchFullName(symbol);
+      // Load DL-Seq-9 data for the selected symbol
+      setTimeout(() => {
+        this.loadDLSeq9();
+      }, 100);
     }
   }
 
@@ -350,6 +422,15 @@ export class AppComponent implements OnInit, AfterViewInit {
   onShowDlSeq9Change(val: boolean) {
     this.showDlSeq9 = val;
     this.saveLayout();
+    // If DL-Seq-9 is being turned on, load and display any saved data
+    if (val) {
+      this.loadDLSeq9();
+    } else {
+      // If DL-Seq-9 is being turned off, clear any displayed DL-Seq-9
+      if (this.chartComponent) {
+        this.chartComponent.clearDLSeq9Display();
+      }
+    }
   }
 
   onShowVolumeOverlapChange(val: boolean) {
@@ -387,15 +468,23 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   onDlSeq9Click(event: { time: string | number; isShowing: boolean }) {
     this.startTime = event.time as string;
-    // Handle the event
-    console.log('AppComponent DLSeq9 Click:', event);
+    // Also set the startTime in the chart component
+    if (this.chartComponent) {
+      this.chartComponent.startTime = event.time;
+    }
+  }
+
+  testSave() {
+    // Use a date format that matches your chart data (YYYY-MM-DD format)
+    this.startTime = '2025-04-08'; // Use a date that exists in your chart data
+    this.saveDLSeq9();
+  }
+
+  testLoad() {
+    this.loadDLSeq9();
   }
 
   onDeleteDLSeq9() {
-    this.instrumentSettingService
-      .deleteSetting(this.userId, this.layoutName, this.symbol, 'dlSeq9')
-      .subscribe((res) => {
-        // handle success, maybe notify StockChartComponent
-      });
+    this.deleteDLSeq9();
   }
 }
