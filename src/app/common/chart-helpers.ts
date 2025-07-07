@@ -268,8 +268,15 @@ export function progressDLSeq9(
   const clickedIndex = data.findIndex((d: any) => d.time === clickedTime);
 
   if (clickedIndex === -1 || !showDlSeq9) {
-    // If no valid click or should not show, clear markers and exit
+    // If no valid click or should not show, clear markers and vertical lines and exit
     chartService.clearMarkers && chartService.clearMarkers();
+    // Also clear any existing vertical lines
+    if (
+      trueVerticalLineService &&
+      typeof trueVerticalLineService.clearVerticalLines === 'function'
+    ) {
+      trueVerticalLineService.clearVerticalLines(chartService.candleSeries);
+    }
     return false;
   }
 
@@ -303,7 +310,19 @@ export function progressDLSeq9(
   }
 
   // Only use DL Sequence "9"s - no TD9 fallback
-  if (specialAllNines.length === 0) {
+  // Clear existing vertical lines first, regardless of the count
+  if (
+    trueVerticalLineService &&
+    typeof trueVerticalLineService.clearVerticalLines === 'function'
+  ) {
+    trueVerticalLineService.clearVerticalLines(chartService.candleSeries);
+  }
+
+  // Only show vertical lines if there are 3 or more "9s"
+  if (specialAllNines.length < 3) {
+    console.log(
+      `Only ${specialAllNines.length} 9s found, need at least 3 for vertical lines`
+    );
     return isDLSeq9Showing;
   }
 
@@ -318,10 +337,8 @@ export function progressDLSeq9(
 
   if (
     trueVerticalLineService &&
-    typeof trueVerticalLineService.clearVerticalLines === 'function' &&
     typeof trueVerticalLineService.createVerticalLines === 'function'
   ) {
-    trueVerticalLineService.clearVerticalLines(chartService.candleSeries);
     trueVerticalLineService
       .createVerticalLines(
         chartService.chart,
@@ -329,7 +346,9 @@ export function progressDLSeq9(
         uniqueTimes
       )
       .then(() => {
-        /* lines created */
+        console.log(
+          `✅ Created ${uniqueTimes.length} vertical lines for ${specialAllNines.length} 9s`
+        );
       })
       .catch((error: any) => {
         console.error('❌ Failed to create TRUE vertical lines:', error);
