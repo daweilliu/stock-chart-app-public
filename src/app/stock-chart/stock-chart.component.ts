@@ -110,9 +110,7 @@ export class StockChartComponent
     if (this.isDestroyed) return;
 
     if (changes['timeframe'] && this.chartContainer) {
-      if (this.chartService.chart) {
-        this.chartService.chart.remove();
-      }
+      this.chartService.destroyChart();
       this.chartService.initChart(this.chartContainer.nativeElement);
       this.loadSymbolData();
       this.resizeChart();
@@ -125,6 +123,47 @@ export class StockChartComponent
       this.chartService.chart
     ) {
       // Reload data to apply D-Mark marker changes and clear DL Sequence markers
+      this.loadSymbolData();
+    }
+
+    // Handle DL-Seq-9 setting changes
+    if (
+      changes['showDlSeq9'] &&
+      this.chartContainer &&
+      this.chartService.chart
+    ) {
+      if (!this.showDlSeq9) {
+        // Clear DL-Seq-9 display when turned off
+        this.clearDLSeq9Display();
+      }
+      // Note: When turned on, the display logic is handled by the app component's loadDLSeq9()
+    }
+
+    // Handle Volume Overlap setting changes
+    if (
+      changes['showVolumeOverlap'] &&
+      this.chartContainer &&
+      this.chartService.chart
+    ) {
+      this.loadSymbolData();
+    }
+
+    // Handle SMA setting changes
+    if (
+      (changes['showSma'] ||
+        changes['showSma1'] ||
+        changes['showSma2'] ||
+        changes['showSma3'] ||
+        changes['showSma4'] ||
+        changes['showSma5'] ||
+        changes['sma1Period'] ||
+        changes['sma2Period'] ||
+        changes['sma3Period'] ||
+        changes['sma4Period'] ||
+        changes['sma5Period']) &&
+      this.chartContainer &&
+      this.chartService.chart
+    ) {
       this.loadSymbolData();
     }
 

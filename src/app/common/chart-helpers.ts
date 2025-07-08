@@ -159,12 +159,31 @@ export function loadSymbolDataExternal(
       //   baseLineColor: 'lightblue',
       // });
 
-      const volumeData = reversedValues.map((bar: any) => ({
-        time: bar.datetime,
-        value: parseFloat(bar.volume),
-        color:
-          parseFloat(bar.close) >= parseFloat(bar.open) ? '#1aff1a' : '#ff3333',
-      }));
+      // Create volume data and ensure it's properly sorted and deduplicated
+      const volumeDataMap = new Map();
+      reversedValues.forEach((bar: any) => {
+        const time = bar.datetime;
+        const volume = parseFloat(bar.volume);
+        // Only add valid volume data (positive numbers and valid timestamps)
+        if (!volumeDataMap.has(time) && !isNaN(volume) && volume >= 0 && time) {
+          volumeDataMap.set(time, {
+            time: time,
+            value: volume,
+            color:
+              parseFloat(bar.close) >= parseFloat(bar.open)
+                ? '#1aff1a'
+                : '#ff3333',
+          });
+        }
+      });
+
+      const volumeData = Array.from(volumeDataMap.values());
+
+      // Sort volume data by time to ensure proper order
+      volumeData.sort(
+        (a: any, b: any) =>
+          new Date(a.time).getTime() - new Date(b.time).getTime()
+      );
 
       chartService.setCandleData(data);
 
@@ -217,7 +236,15 @@ export function loadSymbolDataExternal(
         });
       }
 
-      if (showVolumeOverlap) chartService.setVolumeData(volumeData);
+      if (showVolumeOverlap) {
+        chartService.setVolumeData(volumeData);
+      } else {
+        // Clear volume data when volume overlap is disabled
+        chartService.setVolumeData([]);
+      }
+
+      // Clear any existing SMA lines first
+      chartService.clearSmaSeries && chartService.clearSmaSeries();
 
       if (showSma) {
         if (showSma1) chartService.addSmaLine(data, sma1Period, 'lightblue');
@@ -226,22 +253,22 @@ export function loadSymbolDataExternal(
         if (showSma4) chartService.addSmaLine(data, sma4Period, 'red');
         if (showSma5) chartService.addSmaLine(data, sma5Period, 'purple');
       }
+      // When showSma is false, no SMA lines are added after clearing
 
-      // D-Mark markers - replace all existing markers
+      // D-Mark markers - use dedicated D-Mark marker methods
       if (chartService.isChartValid()) {
-        const markers = buildDMarkMarkers_TD13(data);
-        markers.sort((a: any, b: any) =>
-          typeof a.time === 'number' && typeof b.time === 'number'
-            ? a.time - b.time
-            : new Date(a.time as any).getTime() -
-              new Date(b.time as any).getTime()
-        );
-        if (chartService.candleSeries) {
-          // Set D-Mark markers (or empty array to clear all markers)
-          createSeriesMarkers(
-            chartService.candleSeries,
-            showDMark ? markers : []
+        if (showDMark) {
+          const markers = buildDMarkMarkers_TD13(data);
+          markers.sort((a: any, b: any) =>
+            typeof a.time === 'number' && typeof b.time === 'number'
+              ? a.time - b.time
+              : new Date(a.time as any).getTime() -
+                new Date(b.time as any).getTime()
           );
+          chartService.setDMarkMarkers(markers);
+        } else {
+          // Clear D-Mark markers when disabled
+          chartService.clearDMarkMarkers();
         }
       }
 
@@ -323,8 +350,8 @@ export function progressDLSeq9(
   const clickedIndex = data.findIndex((d: any) => d.time === clickedTime);
 
   if (clickedIndex === -1 || !showDlSeq9) {
-    // If no valid click or should not show, clear markers and vertical lines and exit
-    chartService.clearMarkers && chartService.clearMarkers();
+    // If no valid click or should not show, clear DL-Seq-9 markers and vertical lines and exit
+    chartService.clearDLSeq9Markers && chartService.clearDLSeq9Markers();
     // Also clear any existing vertical lines
     if (
       trueVerticalLineService &&
@@ -335,8 +362,8 @@ export function progressDLSeq9(
     return false;
   }
 
-  // Default: clear all markers first
-  chartService.clearMarkers && chartService.clearMarkers();
+  // Default: clear DL-Seq-9 markers first (but not D-Mark markers)
+  chartService.clearDLSeq9Markers && chartService.clearDLSeq9Markers();
 
   if (isSwingLow(data, clickedIndex, swingBars)) {
     const { markers, specialNines } = buildDLSeqMarkers(
@@ -345,7 +372,7 @@ export function progressDLSeq9(
       'up'
     );
     if (chartService.isChartValid()) {
-      chartService.setMarkers && chartService.setMarkers(markers);
+      chartService.setDLSeq9Markers && chartService.setDLSeq9Markers(markers);
     }
     isDLSeq9Showing = markers.length > 0;
     specialAllNines = specialNines;
@@ -356,7 +383,7 @@ export function progressDLSeq9(
       'down'
     );
     if (chartService.isChartValid()) {
-      chartService.setMarkers && chartService.setMarkers(markers);
+      chartService.setDLSeq9Markers && chartService.setDLSeq9Markers(markers);
     }
     isDLSeq9Showing = markers.length > 0;
     specialAllNines = specialNines;

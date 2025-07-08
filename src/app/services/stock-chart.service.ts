@@ -18,6 +18,11 @@ export class StockChartService {
   volumeSeries: any;
   private currentVerticalLines: any[] = []; // Track current vertical lines
   private isDisposed = false; // Flag to track if chart is disposed
+  private smaSeries: any[] = []; // Track SMA series for cleanup
+
+  // ---- NEW: Separate marker tracking for different types ----
+  private dMarkMarkers: any[] = []; // Track D-Mark markers
+  private dlSeq9Markers: any[] = []; // Track DL-Seq-9 markers
 
   // ---- NEW: Generic Markers API handle ----
   markersApi?: ISeriesMarkersPluginApi<any>;
@@ -49,6 +54,7 @@ export class StockChartService {
       wickUpColor: '#00ff00',
       wickDownColor: '#ff0000',
     });
+
     this.volumeSeries = this.chart.addSeries(HistogramSeries, {
       color: '#888888',
       priceFormat: { type: 'volume', precision: 0, minMove: 1 },
@@ -80,6 +86,40 @@ export class StockChartService {
     }
   }
 
+  // ---- NEW: Manage D-Mark markers separately ----
+  setDMarkMarkers(markers: any[]) {
+    this.dMarkMarkers = markers;
+    this.updateCombinedMarkers();
+  }
+
+  clearDMarkMarkers() {
+    this.dMarkMarkers = [];
+    this.updateCombinedMarkers();
+  }
+
+  // ---- NEW: Manage DL-Seq-9 markers separately ----
+  setDLSeq9Markers(markers: any[]) {
+    this.dlSeq9Markers = markers;
+    this.updateCombinedMarkers();
+  }
+
+  clearDLSeq9Markers() {
+    this.dlSeq9Markers = [];
+    this.updateCombinedMarkers();
+  }
+
+  // ---- NEW: Combine and update all markers ----
+  private updateCombinedMarkers() {
+    const allMarkers = [...this.dMarkMarkers, ...this.dlSeq9Markers];
+    // Sort by time to ensure proper display order
+    allMarkers.sort((a: any, b: any) =>
+      typeof a.time === 'number' && typeof b.time === 'number'
+        ? a.time - b.time
+        : new Date(a.time as any).getTime() - new Date(b.time as any).getTime()
+    );
+    this.setMarkers(allMarkers);
+  }
+
   clearMarkers() {
     if (!this.isDisposed) {
       this.setMarkers([]);
@@ -98,6 +138,20 @@ export class StockChartService {
     }
   }
 
+  clearSmaSeries() {
+    if (!this.isDisposed && this.chart) {
+      // Remove all existing SMA series
+      this.smaSeries.forEach((series) => {
+        try {
+          this.chart.removeSeries(series);
+        } catch (error) {
+          console.warn('Error removing SMA series:', error);
+        }
+      });
+      this.smaSeries = [];
+    }
+  }
+
   addSmaLine(data: CandlestickData[], period: number, color: string) {
     if (this.isDisposed || !this.chart) return null;
 
@@ -109,6 +163,9 @@ export class StockChartService {
       priceLineVisible: false,
     });
     smaSeries.setData(smaData);
+
+    // ---- NEW: Track the created SMA series for cleanup ----
+    this.smaSeries.push(smaSeries);
     return smaSeries;
   }
 
@@ -140,19 +197,29 @@ export class StockChartService {
   }
 
   destroyChart() {
-    if (this.chart && !this.isDisposed) {
+    if (this.isDisposed) {
+      return; // Already disposed, don't try again
+    }
+
+    // Clear all series and references first
+    this.markersApi = undefined;
+    this.currentVerticalLines = [];
+    this.smaSeries = [];
+    this.dMarkMarkers = [];
+    this.dlSeq9Markers = [];
+    this.candleSeries = undefined!;
+    this.volumeSeries = undefined!;
+
+    // Try to remove the chart last
+    if (this.chart) {
       try {
         this.chart.remove();
       } catch (error) {
         console.warn('Error removing chart:', error);
       }
+      this.chart = undefined!;
     }
 
     this.isDisposed = true;
-    this.chart = undefined!;
-    this.candleSeries = undefined!;
-    this.volumeSeries = undefined!;
-    this.markersApi = undefined;
-    this.currentVerticalLines = [];
   }
 }
