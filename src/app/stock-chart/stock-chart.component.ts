@@ -228,9 +228,7 @@ export class StockChartComponent
   reload() {
     if (this.isDestroyed) return;
 
-    if (this.chartService.chart) {
-      this.chartService.chart.remove();
-    }
+    this.chartService.destroyChart();
     this.chartService.initChart(this.chartContainer.nativeElement);
     this.loadSymbolData(this.symbol);
     this.showPanel = false;

@@ -201,6 +201,9 @@ export class StockChartService {
       return; // Already disposed, don't try again
     }
 
+    // Set disposed flag first to prevent any new operations
+    this.isDisposed = true;
+
     // Clear all series and references first
     this.markersApi = undefined;
     this.currentVerticalLines = [];
@@ -215,11 +218,13 @@ export class StockChartService {
       try {
         this.chart.remove();
       } catch (error) {
-        console.warn('Error removing chart:', error);
+        // Suppress the error to prevent it from bubbling up
+        console.warn(
+          'Chart removal warning (suppressed):',
+          error instanceof Error ? error.message : String(error)
+        );
       }
       this.chart = undefined!;
     }
-
-    this.isDisposed = true;
   }
 }
