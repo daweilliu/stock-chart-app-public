@@ -89,39 +89,33 @@ export class StockChartService {
   // ---- NEW: Manage D-Mark markers separately ----
   setDMarkMarkers(markers: any[]) {
     this.dMarkMarkers = markers;
-    this.updateCombinedMarkers();
+    // Only set D-Mark markers, don't combine with DL-Seq-9
+    this.setMarkers(this.dMarkMarkers);
   }
 
   clearDMarkMarkers() {
     this.dMarkMarkers = [];
-    this.updateCombinedMarkers();
+    // When clearing D-Mark, show DL-Seq-9 markers if they exist
+    this.setMarkers(this.dlSeq9Markers);
   }
 
   // ---- NEW: Manage DL-Seq-9 markers separately ----
   setDLSeq9Markers(markers: any[]) {
     this.dlSeq9Markers = markers;
-    this.updateCombinedMarkers();
+    // Only set DL-Seq-9 markers, don't combine with D-Mark
+    this.setMarkers(this.dlSeq9Markers);
   }
 
   clearDLSeq9Markers() {
     this.dlSeq9Markers = [];
-    this.updateCombinedMarkers();
-  }
-
-  // ---- NEW: Combine and update all markers ----
-  private updateCombinedMarkers() {
-    const allMarkers = [...this.dMarkMarkers, ...this.dlSeq9Markers];
-    // Sort by time to ensure proper display order
-    allMarkers.sort((a: any, b: any) =>
-      typeof a.time === 'number' && typeof b.time === 'number'
-        ? a.time - b.time
-        : new Date(a.time as any).getTime() - new Date(b.time as any).getTime()
-    );
-    this.setMarkers(allMarkers);
+    // When clearing DL-Seq-9, show D-Mark markers if they exist
+    this.setMarkers(this.dMarkMarkers);
   }
 
   clearMarkers() {
     if (!this.isDisposed) {
+      this.dMarkMarkers = [];
+      this.dlSeq9Markers = [];
       this.setMarkers([]);
     }
   }
