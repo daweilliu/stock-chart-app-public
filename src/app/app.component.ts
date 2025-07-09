@@ -381,8 +381,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   onSettingsApply() {
     this.showPanel = false;
+    // Note: ngOnChanges will automatically handle the settings updates
+    // No need to call reload() here as it would cause duplicate API calls
     if (this.chartComponent) {
-      this.chartComponent.reload();
       this.resizeChart();
     }
   }

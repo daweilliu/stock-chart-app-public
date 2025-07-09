@@ -45,6 +45,9 @@ export class AppHeaderComponent {
     'daily' | 'weekly' | 'monthly'
   >();
 
+  // Add debouncing for symbol input
+  private symbolInputTimeout: any;
+
   @HostListener('document:keydown', ['$event'])
   handleGlobalKeydown(event: KeyboardEvent) {
     const active = document.activeElement;
@@ -67,7 +70,20 @@ export class AppHeaderComponent {
   }
 
   onSymbolInput(event: any) {
-    this.symbolChange.emit(event.target.value);
+    const value = event.target.value.toUpperCase();
+
+    // Clear any existing timeout
+    if (this.symbolInputTimeout) {
+      clearTimeout(this.symbolInputTimeout);
+    }
+
+    // Only emit change after user stops typing for 1 second
+    this.symbolInputTimeout = setTimeout(() => {
+      if (value.length >= 1) {
+        // Only load if there's at least 1 character
+        this.symbolChange.emit(value);
+      }
+    }, 1000); // 1 second delay
   }
 
   onRangeInput(event: any) {

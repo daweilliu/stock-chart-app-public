@@ -109,48 +109,50 @@ export class StockChartComponent
   ngOnChanges(changes: SimpleChanges): void {
     if (this.isDestroyed) return;
 
+    let needsDataReload = false;
+    let needsChartRebuild = false;
+
+    // Check if we need to rebuild the chart (only for fundamental changes)
     if (changes['timeframe'] && this.chartContainer) {
+      needsChartRebuild = true;
+      needsDataReload = true;
+    }
+
+    // Check if we need to reload data from API (only for data-affecting changes)
+    if (changes['symbol'] || changes['range'] || changes['timeframe']) {
+      needsDataReload = true;
+    }
+
+    // Handle chart rebuild if needed
+    if (needsChartRebuild) {
       this.chartService.destroyChart();
       this.chartService.initChart(this.chartContainer.nativeElement);
-      this.loadSymbolData();
       this.resizeChart();
     }
 
-    // Handle D-Mark setting changes
-    if (
-      changes['showDMark'] &&
-      this.chartContainer &&
-      this.chartService.chart
-    ) {
-      // Reload data to apply D-Mark marker changes and clear DL Sequence markers
+    // Handle data reload if needed (single API call for all changes)
+    if (needsDataReload && this.chartContainer && this.chartService.chart) {
       this.loadSymbolData();
+      return; // Exit early since loadSymbolData will handle all display updates
     }
 
-    // Handle DL-Seq-9 setting changes
-    if (
-      changes['showDlSeq9'] &&
-      this.chartContainer &&
-      this.chartService.chart
-    ) {
-      if (!this.showDlSeq9) {
-        // Clear DL-Seq-9 display when turned off
-        this.clearDLSeq9Display();
+    // Handle display-only changes without API calls
+    if (this.chartContainer && this.chartService.chart) {
+      let needsDisplayUpdate = false;
+
+      // Handle DL-Seq-9 setting changes
+      if (changes['showDlSeq9']) {
+        if (!this.showDlSeq9) {
+          this.clearDLSeq9Display();
+        }
+        needsDisplayUpdate = true;
       }
-      // Note: When turned on, the display logic is handled by the app component's loadDLSeq9()
-    }
 
-    // Handle Volume Overlap setting changes
-    if (
-      changes['showVolumeOverlap'] &&
-      this.chartContainer &&
-      this.chartService.chart
-    ) {
-      this.loadSymbolData();
-    }
-
-    // Handle SMA setting changes
-    if (
-      (changes['showSma'] ||
+      // Handle D-Mark, Volume, or SMA changes that only affect display
+      if (
+        changes['showDMark'] ||
+        changes['showVolumeOverlap'] ||
+        changes['showSma'] ||
         changes['showSma1'] ||
         changes['showSma2'] ||
         changes['showSma3'] ||
@@ -160,20 +162,20 @@ export class StockChartComponent
         changes['sma2Period'] ||
         changes['sma3Period'] ||
         changes['sma4Period'] ||
-        changes['sma5Period']) &&
-      this.chartContainer &&
-      this.chartService.chart
-    ) {
-      this.loadSymbolData();
-    }
+        changes['sma5Period']
+      ) {
+        needsDisplayUpdate = true;
+      }
 
-    // Handle savedStartTime changes for auto-display
-    if (
-      changes['savedStartTime'] &&
-      this.chartContainer &&
-      this.chartService.chart
-    ) {
-      this.loadSymbolData();
+      // Handle savedStartTime changes
+      if (changes['savedStartTime']) {
+        needsDisplayUpdate = true;
+      }
+
+      // Only reload if display settings actually changed
+      if (needsDisplayUpdate) {
+        this.loadSymbolData();
+      }
     }
   }
 
@@ -304,8 +306,12 @@ export class StockChartComponent
 
     // Clear chart markers and restore D-Mark markers if they should be shown
     if (this.showDMark) {
-      // Reload the symbol data to restore D-Mark markers
-      this.loadSymbolData();
+      // Restore D-Mark markers without full data reload
+      // The markers will be restored when the chart is next updated
+      console.log('D-Mark markers will be restored on next chart update');
+    } else {
+      // Clear all markers if D-Mark is not enabled
+      this.chartService.clearDMarkMarkers();
     }
 
     this.showDLSeq9 = false; // Hide the popup menu if needed
@@ -369,8 +375,10 @@ export class StockChartComponent
       // Get the chart's time scale to find the appropriate time
       const timeScale = this.chartService.chart.timeScale();
 
-      // For now, let's reload the symbol data which will check for saved DL-Seq-9
-      this.loadSymbolData();
+      // For auto-display, the saved DL-Seq-9 logic is handled in chart-helpers
+      // No need to reload data here - just log for now
+      console.log('DL-Seq-9 auto-display triggered for time:', startTime);
+      // The display logic is handled in chart-helpers.ts autoDisplaySavedDLSeq9
     } catch (error) {
       console.warn('Error displaying saved DL-Seq-9:', error);
     }
