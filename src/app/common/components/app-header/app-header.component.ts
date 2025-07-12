@@ -62,7 +62,7 @@ export class AppHeaderComponent {
         const inputEl = this.symbolInput.nativeElement;
         if (inputEl.value.length > 0) {
           inputEl.value = '';
-          this.symbolChange.emit('');
+          //this.symbolChange.emit('');
         }
         inputEl.focus();
       }
@@ -80,10 +80,11 @@ export class AppHeaderComponent {
     // Only emit change after user stops typing for 1 second
     this.symbolInputTimeout = setTimeout(() => {
       if (value.length >= 1) {
+        console.log('Symbol input changed:', value);
         // Only load if there's at least 1 character
-        this.symbolChange.emit(value);
+        //this.symbolChange.emit(value);
       }
-    }, 1000); // 1 second delay
+    }, 1); // 1 second delay
   }
 
   onRangeInput(event: any) {
