@@ -4,6 +4,19 @@
     (contextmenu)="onChartContextMenu($event)"
     style="width: 100%; height: 100%"
   ></div>
+  <div
+    #td9Overlay
+    class="td9-overlay"
+    style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    "
+  ></div>
 </div>
 
 <!-- Only render the trigger button if showDLSeq9 is true -->

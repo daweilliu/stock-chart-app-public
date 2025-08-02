@@ -15,7 +15,7 @@ import {
 import { StockChartService } from '../services/stock-chart.service';
 import { StockDataService } from '../services/stock-data.service';
 import { TrueVerticalLineService } from '../services/true-vertical-line.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Time } from '@angular/common';
 import {
   loadSymbolDataExternal,
   getOutputSize,
@@ -23,7 +23,12 @@ import {
 } from '../common/chart-helpers';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { createSeriesMarkers } from 'lightweight-charts';
+import {
+  CandlestickData,
+  createSeriesMarkers,
+  IChartApi,
+  ISeriesApi,
+} from 'lightweight-charts';
 
 @Component({
   selector: 'app-stock-chart',
@@ -42,7 +47,10 @@ export class StockChartComponent
   @Input() showDlSeq9: boolean = true;
   @Input() showVolumeOverlap: boolean = true;
   @ViewChild('chartContainer', { static: false }) chartContainer!: ElementRef;
-  @ViewChild('chartMenu') chartMenuRef!: ElementRef;
+  @ViewChild('td9Overlay', { static: true })
+  td9Overlay!: ElementRef<HTMLDivElement>;
+  @ViewChild('chartMenu')
+  chartMenuRef!: ElementRef;
   @ViewChild('menuTrigger', { static: false })
   menuTrigger!: ElementRef<HTMLButtonElement>;
   @ViewChild(MatMenuTrigger, { static: false }) matMenuTrigger!: MatMenuTrigger;
@@ -88,6 +96,11 @@ export class StockChartComponent
   showDLSeq9 = false; // Control visibility of DLSeq9
   startTime: string | number | null = null;
   private isDestroyed = false; // Flag to track if component is destroyed
+
+  chart!: IChartApi;
+  series!: ISeriesApi<'Candlestick'>;
+  data: CandlestickData[] = [];
+  td9Markers: Array<{ time: Time; logicalIndex: number; isBull: boolean }> = [];
 
   constructor(
     private chartService: StockChartService,
