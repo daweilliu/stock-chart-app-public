@@ -42,7 +42,14 @@ export class StockChartComponent
 {
   @Input() symbol: string = 'AAPL';
   @Input() range: 'ytd' | '1y' | '2y' | '5y' | '10y' | 'max' = '10y';
-  @Input() timeframe: 'daily' | 'weekly' | 'monthly' = 'daily';
+  @Input() timeframe:
+    | '1m'
+    | '15m'
+    | '30m'
+    | '60m'
+    | 'daily'
+    | 'weekly'
+    | 'monthly' = 'daily';
   @Input() showDMark: boolean = true;
   @Input() showDlSeq9: boolean = true;
   @Input() showVolumeOverlap: boolean = true;

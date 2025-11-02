@@ -42,7 +42,7 @@ export class AppHeaderComponent {
   @Output() loadSymbol = new EventEmitter<string>();
   @Output() onRangeChange = new EventEmitter<void>();
   @Output() timeframeChange = new EventEmitter<
-    'daily' | 'weekly' | 'monthly'
+    '1m' | '15m' | '30m' | '60m' | 'daily' | 'weekly' | 'monthly'
   >();
 
   // Add debouncing for symbol input

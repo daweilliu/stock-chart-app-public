@@ -20,7 +20,29 @@ export const dlSeq9Click$ = new EventEmitter<{
   isShowing: boolean;
 }>();
 
-export function getOutputSize(range: string): string {
+export function getOutputSize(
+  range: string,
+  timeframe: string = 'daily'
+): string {
+  // For intraday timeframes, use smaller output sizes since historical data is limited
+  const isIntraday = ['1m', '15m', '30m', '60m'].includes(timeframe);
+
+  if (isIntraday) {
+    switch (range) {
+      case '1y':
+      case '2y':
+      case '5y':
+      case '10y':
+      case 'max':
+        return '5000'; // Maximum available for intraday
+      case 'ytd':
+        return '5000';
+      default:
+        return '5000';
+    }
+  }
+
+  // For daily/weekly/monthly timeframes
   switch (range) {
     case '1y':
       return '365';
@@ -37,8 +59,18 @@ export function getOutputSize(range: string): string {
   }
 }
 
-export function getInterval(timeframe: 'daily' | 'weekly' | 'monthly'): string {
+export function getInterval(
+  timeframe: '1m' | '15m' | '30m' | '60m' | 'daily' | 'weekly' | 'monthly'
+): string {
   switch (timeframe) {
+    case '1m':
+      return '1min';
+    case '15m':
+      return '15min';
+    case '30m':
+      return '30min';
+    case '60m':
+      return '1h';
     case 'daily':
       return '1day';
     case 'weekly':
@@ -53,7 +85,7 @@ export function getInterval(timeframe: 'daily' | 'weekly' | 'monthly'): string {
 export function loadSymbolDataExternal(
   symbol: string,
   range: string,
-  timeframe: 'daily' | 'weekly' | 'monthly',
+  timeframe: '1m' | '15m' | '30m' | '60m' | 'daily' | 'weekly' | 'monthly',
   showSma: boolean,
   showSma1: boolean,
   sma1Period: number,
@@ -76,8 +108,12 @@ export function loadSymbolDataExternal(
   trueVerticalLineService?: TrueVerticalLineService,
   savedDLSeq9StartTime?: string
 ) {
-  const outputsize = getOutputSize(range);
+  const outputsize = getOutputSize(range, timeframe);
   const interval = getInterval(timeframe);
+
+  console.log(
+    `[Chart] Loading data: symbol=${symbol}, interval=${interval}, outputsize=${outputsize}, timeframe=${timeframe}, range=${range}`
+  );
 
   dataService
     .getTimeSeries(symbol, interval, outputsize)
@@ -86,6 +122,13 @@ export function loadSymbolDataExternal(
         console.warn(`No data received for symbol: ${symbol} : ${res.message}`);
         return;
       }
+
+      console.log(
+        `[Chart] Received ${res.values.length} data points. First bar:`,
+        res.values[0],
+        'Last bar:',
+        res.values[res.values.length - 1]
+      );
 
       // Check if chart is still valid before proceeding
       if (!chartService.isChartValid()) {
@@ -110,13 +153,29 @@ export function loadSymbolDataExternal(
           new Date(a.time).getTime() - new Date(b.time).getTime()
       );
 
+      // Check if this is intraday data (needs timestamp, not just date)
+      const isIntraday = ['1m', '15m', '30m', '60m'].includes(timeframe);
+
       // Remove duplicates and format time for lightweight-charts
       const uniqueDataMap = new Map();
       rawData.forEach((bar: any) => {
-        const timeKey = bar.time.slice(0, 10); // Use date as key for deduplication
+        let timeKey: string;
+        let timeValue: string | number;
+
+        if (isIntraday) {
+          // For intraday: use Unix timestamp (seconds) as both key and value
+          const timestamp = Math.floor(new Date(bar.time).getTime() / 1000);
+          timeKey = timestamp.toString();
+          timeValue = timestamp;
+        } else {
+          // For daily/weekly/monthly: use date string (YYYY-MM-DD)
+          timeKey = bar.time.slice(0, 10);
+          timeValue = timeKey;
+        }
+
         if (!uniqueDataMap.has(timeKey)) {
           uniqueDataMap.set(timeKey, {
-            time: timeKey, // Use date format for lightweight-charts
+            time: timeValue,
             open: bar.open,
             high: bar.high,
             low: bar.low,

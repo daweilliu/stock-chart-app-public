@@ -36,7 +36,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   // Symbol and range
   symbol = 'AAPL'; // Default symbol
   range: '1y' | '5y' | 'max' | 'ytd' | '2y' | '10y' = 'max';
-  timeframe: 'daily' | 'weekly' | 'monthly' = 'daily';
+  timeframe: '1m' | '15m' | '30m' | '60m' | 'daily' | 'weekly' | 'monthly' =
+    'daily';
   showWatchlist = false;
   fullName = '';
   isLoadingName = false;
@@ -409,8 +410,17 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   onTimeframeChange(tf: string) {
-    if (['daily', 'weekly', 'monthly'].includes(tf)) {
-      this.timeframe = tf as 'daily' | 'weekly' | 'monthly';
+    if (
+      ['1m', '15m', '30m', '60m', 'daily', 'weekly', 'monthly'].includes(tf)
+    ) {
+      this.timeframe = tf as
+        | '1m'
+        | '15m'
+        | '30m'
+        | '60m'
+        | 'daily'
+        | 'weekly'
+        | 'monthly';
       this.saveLayout();
     }
   }
