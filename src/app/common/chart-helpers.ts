@@ -221,12 +221,32 @@ export function loadSymbolDataExternal(
       // Create volume data and ensure it's properly sorted and deduplicated
       const volumeDataMap = new Map();
       reversedValues.forEach((bar: any) => {
-        const time = bar.datetime;
         const volume = parseFloat(bar.volume);
+
+        // Format time the same way as candle data (Unix timestamp for intraday, date string for daily)
+        let timeKey: string;
+        let timeValue: string | number;
+
+        if (isIntraday) {
+          // For intraday: use Unix timestamp (seconds)
+          const timestamp = Math.floor(new Date(bar.datetime).getTime() / 1000);
+          timeKey = timestamp.toString();
+          timeValue = timestamp;
+        } else {
+          // For daily/weekly/monthly: use date string (YYYY-MM-DD)
+          timeKey = bar.datetime.slice(0, 10);
+          timeValue = timeKey;
+        }
+
         // Only add valid volume data (positive numbers and valid timestamps)
-        if (!volumeDataMap.has(time) && !isNaN(volume) && volume >= 0 && time) {
-          volumeDataMap.set(time, {
-            time: time,
+        if (
+          !volumeDataMap.has(timeKey) &&
+          !isNaN(volume) &&
+          volume >= 0 &&
+          bar.datetime
+        ) {
+          volumeDataMap.set(timeKey, {
+            time: timeValue,
             value: volume,
             color:
               parseFloat(bar.close) >= parseFloat(bar.open)
@@ -239,10 +259,17 @@ export function loadSymbolDataExternal(
       const volumeData = Array.from(volumeDataMap.values());
 
       // Sort volume data by time to ensure proper order
-      volumeData.sort(
-        (a: any, b: any) =>
-          new Date(a.time).getTime() - new Date(b.time).getTime()
-      );
+      volumeData.sort((a: any, b: any) => {
+        const timeA =
+          typeof a.time === 'number'
+            ? a.time
+            : new Date(a.time).getTime() / 1000;
+        const timeB =
+          typeof b.time === 'number'
+            ? b.time
+            : new Date(b.time).getTime() / 1000;
+        return timeA - timeB;
+      });
 
       chartService.setCandleData(data);
 
