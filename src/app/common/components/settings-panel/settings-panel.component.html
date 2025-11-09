@@ -1,5 +1,7 @@
 <div class="settings-panel">
-  <h4 class="title">Chart Settings</h4>
+  <div class="panel-title">Chart Settings</div>
+
+  <!-- Show D-Mark -->
   <div class="settings-row">
     <label class="settings-label">
       <input
@@ -10,6 +12,8 @@
       Show D-Mark
     </label>
   </div>
+
+  <!-- Show DL-Seq-9 -->
   <div class="settings-row">
     <label class="settings-label">
       <input
@@ -20,6 +24,8 @@
       Show DL-Seq-9
     </label>
   </div>
+
+  <!-- Volume Overlap -->
   <div class="settings-row">
     <label class="settings-label">
       <input
@@ -30,8 +36,10 @@
       Volume Overlap
     </label>
   </div>
+
+  <!-- Show SMA (with Edit button — emits to parent to open SMA dialog) -->
   <div class="settings-row">
-    <label>
+    <label class="settings-label">
       <input
         type="checkbox"
         [(ngModel)]="showSma"
@@ -43,18 +51,33 @@
       mat-icon-button
       type="button"
       class="edit-btn"
-      (click)="showSmaSetting = true"
       title="Edit"
+      [disabled]="!showSma"
+      (click)="openSmaSetting.emit()"
     >
       <mat-icon>edit</mat-icon>
     </button>
   </div>
-  <button (click)="applySettings()">Apply</button>
-</div>
 
-<app-sma-setting
-  *ngIf="showSmaSetting"
-  [smas]="smas"
-  (close)="showSmaSetting = false"
-  (apply)="onSmaApply($event)"
-></app-sma-setting>
+  <!-- Show Space-Time Gate (with MatDialog Edit) -->
+  <div class="settings-row">
+    <label class="settings-label">
+      <input
+        type="checkbox"
+        [(ngModel)]="showSpaceTimeGate"
+        (change)="showSpaceTimeGateChange.emit(showSpaceTimeGate)"
+      />
+      Show Space-Time Gate
+    </label>
+    <button
+      mat-icon-button
+      type="button"
+      class="edit-btn"
+      title="Edit"
+      [disabled]="!showSpaceTimeGate"
+      (click)="openStgDialog()"
+    >
+      <mat-icon>edit</mat-icon>
+    </button>
+  </div>
+</div>

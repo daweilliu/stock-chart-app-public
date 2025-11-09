@@ -1,0 +1,76 @@
+:host {
+  display: block;
+}
+
+/* Scope all overrides to this dialog only */
+::ng-deep .stg-dialog-panel .mat-mdc-dialog-container {
+  /* dark + no internal padding from container */
+  --mdc-dialog-container-color: #101010 !important;
+  color: #e5e7eb !important;
+  background-color: #101010 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+::ng-deep .stg-dialog-panel .mdc-dialog__surface {
+  background: #101010 !important;
+  box-shadow: none !important;
+  border-radius: 10px !important;
+  /* remove any default outline gaps */
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* No title bar (we removed it), ensure no residual spacing */
+::ng-deep .stg-dialog-panel .mat-mdc-dialog-title {
+  display: none !important;
+}
+
+/* Remove Material’s default 24px padding on content */
+::ng-deep .stg-dialog-panel .mat-mdc-dialog-content {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Center the actions and make them compact */
+::ng-deep .stg-dialog-panel .mat-mdc-dialog-actions {
+  padding: 4px 0 6px 0 !important;
+  margin: 0 !important;
+  justify-content: center !important; /* 👈 center buttons */
+  gap: 6px !important;
+  background: #101010 !important;
+  border-top: 1px solid #242424 !important;
+}
+
+/* Compact, neutral dark buttons (no blue) */
+::ng-deep .stg-dialog-panel .mdc-button {
+  min-width: 60px !important;
+  height: 26px !important;
+  font-size: 12px !important;
+  padding: 0 10px !important;
+  border-radius: 6px !important;
+  line-height: 1.2 !important;
+}
+
+/* Cancel */
+::ng-deep .stg-dialog-panel .mdc-button:not(.mdc-button--unelevated) {
+  color: #b3b3b3 !important;
+}
+::ng-deep .stg-dialog-panel .mdc-button:not(.mdc-button--unelevated):hover {
+  color: #fff !important;
+}
+
+/* Apply (flat/elevated) */
+::ng-deep .stg-dialog-panel .mdc-button--unelevated {
+  background: #2e2e2e !important;
+  color: #e5e7eb !important;
+  box-shadow: none !important;
+}
+::ng-deep .stg-dialog-panel .mdc-button--unelevated:hover {
+  background: #3a3a3a !important;
+}
+
+/* Optional: darker overlay behind dialog (backdrop) */
+::ng-deep .cdk-overlay-backdrop.cdk-overlay-backdrop-showing {
+  background: rgba(0, 0, 0, 0.8) !important;
+}

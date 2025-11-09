@@ -1,0 +1,24 @@
+<div class="stg-card" [class.is-disabled]="disabled">
+  <div class="stg-header">
+    <div class="stg-title">Space-Time Gate</div>
+    <div class="stg-badge" *ngIf="currentPreset() as p">{{ p.timeframe }}</div>
+  </div>
+
+  <label class="stg-sub" [attr.for]="selectId">Select horizon</label>
+
+  <select
+    #sel
+    class="stg-select"
+    [id]="selectId"
+    [disabled]="disabled"
+    [value]="value()"
+    (change)="onChange(sel.value)"
+    aria-label="Space-Time Gate horizon"
+  >
+    <option *ngFor="let p of presets()" [value]="p.key">{{ p.label }}</option>
+  </select>
+
+  <div class="stg-tip">
+    Short → 15m, Medium-short → 1D, Medium → 1W, Long → 1M
+  </div>
+</div>
