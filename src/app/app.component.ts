@@ -1,4 +1,10 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ViewChild,
+  Inject,
+} from '@angular/core';
 import { AngularSplitModule } from 'angular-split';
 import { StockChartComponent } from './stock-chart/stock-chart.component';
 import { SettingsPanelComponent } from './common/components/settings-panel/settings-panel.component';
@@ -13,6 +19,48 @@ import { SplitComponent } from 'angular-split';
 import { Subscription } from 'rxjs';
 import { SettingsService } from './services/settings.service';
 import { InstrumentSettingService } from './services/instrument-setting.service';
+import {
+  MatDialog,
+  MatDialogModule,
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { SmaSettingComponent } from './common/components/settings-panel/sma-setting/sma-setting.component';
+
+// --- SMA dialog with embedded SmaSettingComponent (moved above AppComponent) ---
+@Component({
+  selector: 'app-sma-settings-dialog',
+  standalone: true,
+  imports: [MatDialogModule, MatButtonModule, SmaSettingComponent],
+  template: `
+    <app-sma-setting
+      [smas]="smas"
+      (apply)="onApply($event)"
+      (close)="onClose()"
+    ></app-sma-setting>
+  `,
+})
+export class SmaSettingsDialogComponent {
+  smas: any[] = [];
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: { smas: any[] },
+    public dialogRef: MatDialogRef<SmaSettingsDialogComponent>
+  ) {
+    if (data?.smas) {
+      this.smas = JSON.parse(JSON.stringify(data.smas));
+    }
+  }
+
+  onApply(updated: any[]) {
+    this.dialogRef.close({ smas: updated });
+  }
+
+  onClose() {
+    this.dialogRef.close();
+  }
+}
 
 @Component({
   standalone: true,
@@ -27,6 +75,9 @@ import { InstrumentSettingService } from './services/instrument-setting.service'
     WatchlistPanelComponent,
     FormsModule,
     CommonModule,
+    MatDialogModule,
+    MatButtonModule,
+    SmaSettingsDialogComponent,
   ],
 })
 export class AppComponent implements OnInit, AfterViewInit {
@@ -71,13 +122,15 @@ export class AppComponent implements OnInit, AfterViewInit {
   saveStatus: 'idle' | 'saving' | 'success' | 'error' = 'idle';
   startTime: string = '00:00:00'; // Default start time for DLSeq9
   private sub?: Subscription;
+  private smaDialogRef?: MatDialogRef<SmaSettingsDialogComponent>;
 
   constructor(
     private stockData: StockDataService,
     private layoutService: LayoutService,
     private settingsService: SettingsService,
     private instrumentSettingService: InstrumentSettingService,
-    private http: HttpClient
+    private http: HttpClient,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -497,5 +550,22 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   onDeleteDLSeq9() {
     this.deleteDLSeq9();
+  }
+
+  onOpenSmaSetting() {
+    if (this.dialog.getDialogById('sma-settings-dialog')) {
+      return;
+    }
+    this.smaDialogRef = this.dialog.open(SmaSettingsDialogComponent, {
+      id: 'sma-settings-dialog',
+      data: { smas: this.smas },
+      width: '420px',
+    });
+    this.smaDialogRef.afterClosed().subscribe((result) => {
+      this.smaDialogRef = undefined;
+      if (result?.smas) {
+        this.onSmasChange(result.smas);
+      }
+    });
   }
 }

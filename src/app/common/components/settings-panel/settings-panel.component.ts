@@ -84,4 +84,9 @@ export class SettingsPanelComponent {
       // this.overlayService.updateSpaceTimeGate(result.key);
     });
   }
+
+  onSmaEditClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.openSmaSetting.emit();
+  }
 }
